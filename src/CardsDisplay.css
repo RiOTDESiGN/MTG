@@ -1,0 +1,105 @@
+body {
+    overflow-x: hidden;
+}
+
+.cardContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
+    gap: 30px;
+    visibility: hidden;
+}
+.cardContainer > * {
+    visibility: visible;
+    background-color: rgba(0, 0, 0);
+    border: 2px solid rgba(0, 0, 0, 0.26);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 341px;
+    border-radius: 24px;
+    font-size: 10px;
+}
+
+.imgContainer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.displayCard img {
+    max-width: 333px;
+    border-radius: 20px;
+    transition: .2s;
+    border: 2px solid transparent;
+    transform: perspective(700px) translateY(-4%) rotateX(25deg) scale(0.8);
+    box-shadow: 0px 0px 100px 0px rgba(156, 120, 41, 0.75);
+}
+
+.aftermath:hover,
+.split:hover {
+    cursor: pointer;
+}
+
+.aftermath, .split {
+    transition: .3s;
+}
+.aftermath:active {
+    transform: rotate(-90deg);
+    image-rendering: crisp-edges;
+    z-index: 1;
+}
+.split:active {
+    transform: rotate(90deg);
+    image-rendering: crisp-edges;
+    z-index: 1;
+}
+
+.meldCardTitle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 2px solid rgb(156, 120, 41);
+}
+
+.flip-card-container {
+    width: 337px;
+    height: 471px;
+    perspective: 1200px;
+}
+
+.flip-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform ease-in-out .6s;
+    transform-style: preserve-3d;
+}
+
+.flipped {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    cursor: pointer;
+}
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+.hovered img {
+    transform: scale(1) translateY(2px);
+    border: 2px solid rgb(156, 120, 41);
+    box-shadow: 0px 0px 10px 0px rgb(156, 120, 41);
+}
+
+.siege {
+    transform: rotate(90deg);
+    image-rendering: crisp-edges;
+}
