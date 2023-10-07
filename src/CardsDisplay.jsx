@@ -1,32 +1,71 @@
 import React, { useState } from "react";
 import axios from "axios";
-import './CardsDisplay.css'
 
 function CardsDisplay() {
-  const [query, setQuery] = useState("");
-	const [errorMessage, setErrorMessage] = useState('');
-  const [cards, setCards] = useState([]);
-	const [selectedSort, setSelectedSort] = useState("");
-	const [hoveredCard, setHoveredCard] = useState("");
-	const [activeCards, setActiveCards] = useState([]);
+  const [query, 				setQuery] 				= useState("");
+	const [errorMessage, 	setErrorMessage] 	= useState('');
+  const [cards, 				setCards] 				= useState([]);
+	const [totalCards, 		setTotalCards] 		= useState(0);
+	const [selectedSort, 	setSelectedSort] 	= useState("");
+	const [hoveredCard, 	setHoveredCard] 	= useState("");
+	const [activeCards, 	setActiveCards] 	= useState([]);
+	const [currentPage, 	setCurrentPage] 	= useState(1);
+	const [nextPageUrl, 	setNextPageUrl] 	= useState("");
+	const [isLoading, 		setIsLoading] 		= useState(false);
 
-const searchCards = async () => {
-  try {
-    const response = await axios.get(`https://api.scryfall.com/cards/search?q=${query}`);
-    setCards(response.data.data);
+	const newSearch = () => {
+		setSelectedSort("");
+	};
+
+	const searchCards = async () => {
+		console.log('Communicating with API.');
+	
+		setCards([]);
+		setNextPageUrl("");
 		newSearch("");
-  } catch (error) {
-    if (error.response && error.response.status === 404) {
-      setErrorMessage("No cards found. Your search didn’t match any cards, please try again.")
-			setCards([]);
-			newSearch("");
-    }
-  }
-};
+		setTotalCards("0");
+		
+		try {
+			let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
+			const response = await axios.get(apiUrl);
+	
+			setCards(response.data.data);
+			setTotalCards(response.data.total_cards);
+			
+			if (response.data.has_more) {
+				setNextPageUrl(response.data.next_page);
+			}
+		} catch (error) {
+			const errorMessage = error.response && error.response.status === 404
+				? "No cards found. Your search didn’t match any cards, please try again."
+				: "An error occurred";
+			
+			setErrorMessage(errorMessage);
+		}
+	};	
 
-const newSearch = () => {
-  setSelectedSort("");
-};
+	const cardsPerPage = 175;
+	const totalPages = Math.ceil(totalCards / cardsPerPage);
+	const pageButtons = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+	const goToPage = async (page) => {
+		setCurrentPage(page);
+		await searchCards();
+	};	
+
+	const nextPage = async () => {
+		setIsLoading(true);
+		setCurrentPage(prevPage => prevPage + 1);
+		await searchCards();
+		setIsLoading(false);
+	};
+	
+	const prevPage = async () => {
+		setIsLoading(true);
+		setCurrentPage(prevPage => prevPage - 1);
+		await searchCards();
+		setIsLoading(false);
+	};
 
 const compareByLocale = (val1, val2) => val1.localeCompare(val2);
 
@@ -83,17 +122,28 @@ const handleCardEvent = (event, cardId) => {
 	};
 
 	const renderImage = (card) => {
-		if (card.image_uris && card.layout !== "meld") {
+		if (card.image_uris && card.layout !== "meld" && card.layout !== "flip") {
 			return (
 				<div className={getCardClass(card)}>
 					<img src={card.image_uris.normal} alt={card.name} />
 				</div>
 			);
-		} 
+		}
+		if (card.layout === "flip") {
+			return (
+				<div className="upsidedown-container">
+					<div className={`${activeCards.includes(card.id) ? 'upsidedown' : ''}`} onClick={() => handleCardEvent(card.id)}>
+						<div className={getCardClass(card)}>
+							<img src={card.image_uris.normal} alt={card.name} />
+						</div>
+					</div>
+				</div>
+			);
+		}
 		if (card.card_faces) {
 			return (
 				<div className="flip-card-container">
-					<div className={`flip-card ${activeCards.includes(card.id) ? 'flipped' : ''}`} onClick={() => handleCardEvent(card.id)}>
+					<div className={`flip-card ${activeCards.includes(card.id) ? 'flipped' : 'flipped-back'}`} onClick={() => handleCardEvent(card.id)}>
 						{card.card_faces.map((card_face, index) => (
 							<div key={index} className={`${getCardClass(card, index)}`}>
 								<img src={card_face.image_uris.normal} alt={card_face.name} />
@@ -102,7 +152,7 @@ const handleCardEvent = (event, cardId) => {
 					</div>
 				</div>
 			);
-		}			
+		}
 		if (card.all_parts && card.layout === "meld") {
 			const sortedParts = [...card.all_parts].sort((a, b) => {
 				const order = ['meld_part', 'token', 'meld_result'];
@@ -119,33 +169,41 @@ const handleCardEvent = (event, cardId) => {
 					))}
 				</div>
 			);
-		}		
+		}
 		return null;
 	};
 
   return (
-    <div className="cardPage">
+    <div>
 			<form onSubmit={(e) => {
-      e.preventDefault();
-        searchCards();
-    }}>
-      <input
-				type="text"
-				value={query}
-				placeholder="Search by name.."
-				onChange={e => setQuery(e.target.value)}
-			/>
-      <button onClick={searchCards}>Search</button>
+				e.preventDefault();
+					searchCards();}}>
+				<input
+					type="text"
+					value={query}
+					placeholder="Search by name.."
+					onChange={e => setQuery(e.target.value)}
+				/>
+				<button onClick={searchCards}>Search</button>
 			</form>
-			<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
-				<option value="" disabled>Sort by..</option>
-				<option value="rarity">Sort by Rarity</option>
-				<option value="layout">Sort by Layout</option>
-				<option value="name">Sort by Name</option>
-				<option value="color_identity">Sort by Color</option>
-			</select>
-			<div>Cards found: {cards.length}</div>
-			<br />
+			<div className="sorting">
+				<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
+					<option value="" disabled>Sort by..</option>
+					<option value="rarity">Sort by Rarity</option>
+					<option value="layout">Sort by Layout</option>
+					<option value="name">Sort by Name</option>
+					<option value="color_identity">Sort by Color</option>
+				</select>
+			</div>
+			<div className="pagination">
+				<button onClick={prevPage} disabled={currentPage === 1 || isLoading}>Previous</button>
+				{pageButtons.map((page) => (
+					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
+				))}
+				<button onClick={nextPage} disabled={currentPage === totalPages || !nextPageUrl || isLoading}>Next</button>
+				{isLoading && <span>Loading...</span>}
+			</div>
+			Total Cards found: {totalCards}
 			{errorMessage && <div>{errorMessage}</div>}
 			<div className="cardContainer">
 				{cards.map(card => (

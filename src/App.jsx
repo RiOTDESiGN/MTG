@@ -7,7 +7,7 @@ function App() {
   return (
     <>
     	<div className="title">
-        <img src={MTGlogo} alt="" />
+        <img src={MTGlogo} alt="Magic The Gathering Logo" />
       </div>
       <CardsDisplay />
     </>
