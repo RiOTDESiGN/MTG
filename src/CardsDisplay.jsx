@@ -28,28 +28,26 @@ function CardsDisplay() {
 	
 		setIsLoading(true);
 	
-		setTimeout(async () => {
-			try {
-				let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
-				const response = await axios.get(apiUrl);
-	
-				setCards(response.data.data);
-				setTotalCards(response.data.total_cards);
-	
-				if (response.data.has_more) {
-					setNextPageUrl(response.data.next_page);
-				}
-			} catch (error) {
-				const errorMessageC = error.response && error.response.status === 404
-					? "No cards found. Your search didn’t match any cards, please try again."
-					: "An error occurred";
-				
-				setErrorMessageC(errorMessageC);
-			} finally {
-				setIsLoading(false);
+		try {
+			let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
+			const response = await axios.get(apiUrl);
+
+			setCards(response.data.data);
+			setTotalCards(response.data.total_cards);
+
+			if (response.data.has_more) {
+				setNextPageUrl(response.data.next_page);
 			}
-		}, 5000);
-	};	
+		} catch (error) {
+			const errorMessageC = error.response && error.response.status === 404
+				? "No cards found. Your search didn’t match any cards, please try again."
+				: "An error occurred";
+			
+			setErrorMessageC(errorMessageC);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
@@ -219,17 +217,22 @@ const handleClose = () => {
 
   return (
     <div>
-			<form onSubmit={(e) => {
-				e.preventDefault();
-					searchCards();}}>
-				<input
-					type="text"
-					value={query}
-					placeholder="Search by name.."
-					onChange={e => setQuery(e.target.value)}
-				/>
-				<button onClick={searchCards}>Search</button>
-			</form>
+			<div className="searchfield">
+				<form onSubmit={(e) => {
+					e.preventDefault();
+						searchCards();}}>
+					<input
+						type="text"
+						value={query}
+						placeholder="Search by name.."
+						onChange={e => setQuery(e.target.value)}
+					/>
+					<button onClick={searchCards}>Search</button>
+				</form>
+				<div className="total-cards">
+					Total Cards found: {totalCards}
+				</div>
+			</div>
 			<div className="sorting">
 				<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
 					<option value="" disabled>Sort by..</option>
@@ -239,14 +242,6 @@ const handleClose = () => {
 					<option value="color_identity">Sort by Color</option>
 				</select>
 			</div>
-			<div className="pagination">
-				<button onClick={prevPage} disabled={currentPage === 1 || isLoading}>Previous</button>
-				{pageButtons.map((page) => (
-					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
-				))}
-				<button onClick={nextPage} disabled={currentPage === totalPages || !nextPageUrl || isLoading}>Next</button>
-			</div>
-			Total Cards found: {totalCards}
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			<div className="cardContainer">
@@ -286,6 +281,13 @@ const handleClose = () => {
 						Type Line: {card.type_line} */}
 					</div>
 				))}
+			</div>
+			<div className="pagination">
+				<button onClick={prevPage} disabled={currentPage === 1 || isLoading}>Previous</button>
+				{pageButtons.map((page) => (
+					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
+				))}
+				<button onClick={nextPage} disabled={currentPage === totalPages || !nextPageUrl || isLoading}>Next</button>
 			</div>
     </div>
   );

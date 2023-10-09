@@ -27,13 +27,32 @@ body {
   text-align: center;  
 }
 
+button, input, select {
+  padding: 2px 8px;
+  margin: 4px;
+}
+
 .no-scroll {
   overflow: hidden;
 }
 
+.searchfield {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
 form {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   place-items: center;
+}
+
+.total-cards {
+  font-size: 20px;
+  padding: 0 4px;
 }
 
 .title {
@@ -42,13 +61,20 @@ form {
 }
 .title img {
   width: 100%;
-  max-width: 1000px;
+  max-width: 800px;
   padding-bottom: 40px;
 }
 
 .sorting {
   display: flex;
+  justify-content: right;
+}
+
+.cards-loading {
+  display: flex;
   justify-content: center;
+  padding-top: 40px;
+  font-size: 40px;
 }
 
 .pagination {
@@ -56,16 +82,10 @@ form {
   justify-content: center;
 }
 
-.cards-loading {
-  display: flex;
-  justify-content: center;
-  padding: 100px;
-  font-size: 40px;
-}
-
 .cardContainer {
   display: grid;
   place-items: center;
+  padding: 24px 0;
   grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
   gap: 30px;
 }
@@ -85,6 +105,8 @@ form {
 
 .imgContainer {
   padding: 2px 0;
+  width: 332px;
+  height: 465px;
 }
 
 .modal {
@@ -138,17 +160,18 @@ form {
 }
 
 .aftermath, .split {
+  position: absolute;
+  width: 333px;
+  image-rendering: crisp-edges;
   transition: .3s;
 }
 .aftermath:active {
-  width: 333px;
   transform: rotate(-90deg);
-  image-rendering: crisp-edges;
+  z-index: 1;
 }
 .split:active {
-  width: 333px;
   transform: rotate(90deg);
-  image-rendering: crisp-edges;
+  z-index: 1;
 }
 
 .meldCardTitle {
@@ -159,8 +182,7 @@ form {
 }
 
 .flip-card-container {
-  width: 332px;
-  height: 461px;
+  height: 465px;
   perspective: 1200px;
 }
 
@@ -169,7 +191,7 @@ form {
 }
 
 .flipped {
-  animation: flip .7s ease-in forwards;
+  animation: flip 1s ease-in forwards;
 }
 @keyframes flip {
     0% {transform: rotateY(0deg);}
@@ -204,6 +226,7 @@ form {
 }
 
 .siege {
+  position: absolute;
   width: 333px;
   transform: rotate(90deg);
   image-rendering: crisp-edges;
