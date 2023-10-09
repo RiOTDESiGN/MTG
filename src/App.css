@@ -2,19 +2,19 @@
   --body_bgc: rgb(49, 44, 40);
   --body_text_color: rgba(255, 255, 255, 0.87);
 
-  /* --card_bgc: rgba(0, 0, 0, 0.25);
-  --card_border: rgba(0, 0, 0, 0.25); */
-
-  --card_bgc: rgb(87, 87, 87);
+  --card_bgc: rgba(0, 0, 0);
   --card_border: rgb(0, 0, 0);
 
-  /* --dc_boxshadow: 0px 0px 100px 0px rgba(156, 120, 41, 0.75);
+  --dc_boxshadow: 0px 0px 100px 0px rgba(156, 120, 41, 0.75);
   --dc_boxshadow_hover: 0px 0px 10px 0px rgb(156, 120, 41);
-  --dc_border_hover: 2px solid rgb(156, 120, 41); */
+  --dc_border_hover: 2px solid rgb(156, 120, 41);
 
-  --dc_boxshadow: 0px 0px 100px 0px transparent
+  /* --card_bgc: rgb(87, 87, 87);
+  --card_border: rgb(0, 0, 0); */
+
+  /* --dc_boxshadow: 0px 0px 100px 0px transparent
   --dc_boxshadow_hover: 0px 0px 10px 0px transparent;
-  --dc_border_hover: 2px solid transparent;
+  --dc_border_hover: 2px solid transparent; */
 
   --meld_border: 2px solid rgb(156, 120, 41);
 }
@@ -43,8 +43,8 @@ form {
 }
 
 .sorting {
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .pagination {
@@ -76,6 +76,36 @@ form {
   padding: 2px 0;
 }
 
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  background-color: var(--body_bgc);
+  overflow-y: auto;
+  z-index: 999;
+}
+.modal button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.printsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
+  gap: 4px;
+  padding-top: 20px;
+}
+
+.unique-print {
+  border-radius: 22px;
+}
+
 .displayCard img {
   width: 332px;
   border-radius: 22px;
@@ -100,11 +130,12 @@ form {
   transition: .3s;
 }
 .aftermath:active {
+  width: 333px;
   transform: rotate(-90deg);
   image-rendering: crisp-edges;
-  z-index: 1;
 }
 .split:active {
+  width: 333px;
   transform: rotate(90deg);
   image-rendering: crisp-edges;
 }
