@@ -128,12 +128,15 @@ const handleDoubleClick = (name) => {
   setErrorMessageP("");
   setModalOpen(true);
   searchPrints(name);
+	document.body.classList.add('no-scroll');
 };
 
 const handleClose = () => {
   setModalOpen(false);
   setPrints([]);
+	document.body.classList.remove('no-scroll');
 };
+
 
 	const getCardClass = (card, index) => {
 		const classNames = ["displayCard"];
@@ -247,7 +250,10 @@ const handleClose = () => {
 							onMouseOver={(e) => handleCardEvent(e, card.id)}
 							onMouseOut={(e) => handleCardEvent(e, card.id)}
 							onClick={(e) => handleCardEvent(e, card.id)}
-							onDoubleClick={() => handleDoubleClick(card.name)}
+							onContextMenu={(e) => {
+								e.preventDefault();
+								handleDoubleClick(card.name);
+							}}
 						>
 							{isModalOpen && (
 								<div className="modal">
