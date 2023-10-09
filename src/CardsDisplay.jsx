@@ -25,32 +25,38 @@ function CardsDisplay() {
 		setNextPageUrl("");
 		setSelectedSort("");
 		setTotalCards("0");
-		
-		try {
-			let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
-			const response = await axios.get(apiUrl);
 	
-			setCards(response.data.data);
-			setTotalCards(response.data.total_cards);
-			
-			if (response.data.has_more) {
-				setNextPageUrl(response.data.next_page);
+		setIsLoading(true);
+	
+		setTimeout(async () => {
+			try {
+				let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
+				const response = await axios.get(apiUrl);
+	
+				setCards(response.data.data);
+				setTotalCards(response.data.total_cards);
+	
+				if (response.data.has_more) {
+					setNextPageUrl(response.data.next_page);
+				}
+			} catch (error) {
+				const errorMessageC = error.response && error.response.status === 404
+					? "No cards found. Your search didn’t match any cards, please try again."
+					: "An error occurred";
+				
+				setErrorMessageC(errorMessageC);
+			} finally {
+				setIsLoading(false);
 			}
-		} catch (error) {
-			const errorMessageC = error.response && error.response.status === 404
-				? "No cards found. Your search didn’t match any cards, please try again."
-				: "An error occurred";
-			
-			setErrorMessageC(errorMessageC);
-		}
-	};
+		}, 5000);
+	};	
 
 	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
 		console.log('Communicating with the API.');
 	
 		try {
-			let apiUrl = `https://api.scryfall.com/cards/search?q="${nameToSearch}"+include:extras&unique=prints`;
+			let apiUrl = `https://api.scryfall.com/cards/search?q="${nameToSearch}"&unique=prints`;
 			const response = await axios.get(apiUrl);
 			setPrints(response.data.data);
 			setTotalPrints(response.data.total_cards);
@@ -132,8 +138,9 @@ const handleDoubleClick = (name) => {
 };
 
 const handleClose = () => {
-  setModalOpen(false);
   setPrints([]);
+	setTotalPrints("");
+	setModalOpen(false);
 	document.body.classList.remove('no-scroll');
 };
 
@@ -238,10 +245,10 @@ const handleClose = () => {
 					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
 				))}
 				<button onClick={nextPage} disabled={currentPage === totalPages || !nextPageUrl || isLoading}>Next</button>
-				{isLoading && <span>Loading...</span>}
 			</div>
 			Total Cards found: {totalCards}
 			{errorMessageC && <div>{errorMessageC}</div>}
+			{isLoading && <div className="cards-loading">Loading...</div>}
 			<div className="cardContainer">
 				{cards.map(card => (
 					<div key={card.id} className="card">

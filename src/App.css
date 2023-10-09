@@ -56,6 +56,13 @@ form {
   justify-content: center;
 }
 
+.cards-loading {
+  display: flex;
+  justify-content: center;
+  padding: 100px;
+  font-size: 40px;
+}
+
 .cardContainer {
   display: grid;
   place-items: center;
@@ -197,6 +204,7 @@ form {
 }
 
 .siege {
+  width: 333px;
   transform: rotate(90deg);
   image-rendering: crisp-edges;
 }
