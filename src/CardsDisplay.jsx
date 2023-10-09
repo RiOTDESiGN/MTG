@@ -45,12 +45,12 @@ function CardsDisplay() {
 		}
 	};
 
-	const searchPrints = async () => {		
+	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
 		console.log('Communicating with the API.');
-
+	
 		try {
-			let apiUrl = `https://api.scryfall.com/cards/search?q="${clickedCardName}"&unique=prints`;
+			let apiUrl = `https://api.scryfall.com/cards/search?q="${nameToSearch}"+include:extras&unique=prints`;
 			const response = await axios.get(apiUrl);
 			setPrints(response.data.data);
 			setTotalPrints(response.data.total_cards);
@@ -125,13 +125,14 @@ const handleCardEvent = (event, cardId) => {
 
 const handleDoubleClick = (name) => {
   setClickedCardName(name);
-	setErrorMessageP("");
+  setErrorMessageP("");
   setModalOpen(true);
-  searchPrints();
+  searchPrints(name);
 };
 
 const handleClose = () => {
-	setModalOpen(false);
+  setModalOpen(false);
+  setPrints([]);
 };
 
 	const getCardClass = (card, index) => {
