@@ -22,9 +22,10 @@ function CardsDisplay() {
 		console.log('Communicating with the API.');
 	
 		setCards([]);
-		setNextPageUrl("");
+		setNextPageUrl(null);
 		setSelectedSort("");
 		setTotalCards("0");
+		setErrorMessageC("");
 	
 		setIsLoading(true);
 	
@@ -46,6 +47,7 @@ function CardsDisplay() {
 			setErrorMessageC(errorMessageC);
 		} finally {
 			setIsLoading(false);
+			setQuery("");
 		}
 	};
 
@@ -54,7 +56,7 @@ function CardsDisplay() {
 		console.log('Communicating with the API.');
 	
 		try {
-			let apiUrl = `https://api.scryfall.com/cards/search?q="${nameToSearch}"&unique=prints`;
+			let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=!"${nameToSearch}"+include:extras&unique=prints`;
 			const response = await axios.get(apiUrl);
 			setPrints(response.data.data);
 			setTotalPrints(response.data.total_cards);
@@ -71,20 +73,22 @@ function CardsDisplay() {
 	const pageButtons = Array.from({ length: totalPages }, (_, i) => i + 1);
 
 	const goToPage = async (page) => {
+		setIsLoading(true);
 		setCurrentPage(page);
 		await searchCards();
+		setIsLoading(false);
 	};	
 
 	const nextPage = async () => {
 		setIsLoading(true);
-		setCurrentPage(prevPage => prevPage + 1);
+		setCurrentPage(prev => prev + 1);
 		await searchCards();
 		setIsLoading(false);
 	};
 	
 	const prevPage = async () => {
 		setIsLoading(true);
-		setCurrentPage(prevPage => prevPage - 1);
+		setCurrentPage(prev => prev - 1);
 		await searchCards();
 		setIsLoading(false);
 	};
@@ -127,7 +131,7 @@ const handleCardEvent = (event, cardId) => {
   }
 };
 
-const handleDoubleClick = (name) => {
+const handleRightClick = (name) => {
   setClickedCardName(name);
   setErrorMessageP("");
   setModalOpen(true);
@@ -142,17 +146,20 @@ const handleClose = () => {
 	document.body.classList.remove('no-scroll');
 };
 
-
 	const getCardClass = (card, index) => {
 		const classNames = ["displayCard"];
-		if (card.id === hoveredCard) {
-			classNames.push("hovered");
-		}
+		if (card.id === hoveredCard) {classNames.push("hovered");}
 		const pushIfCondition = (condition, className) => condition && classNames.push(className);
-					pushIfCondition		(card.layout === "transform" || card.layout === "reversible_card" || card.layout === "modal_dfc", index === 1 ? "flip-card-back" : "flip-card-front");
-					pushIfCondition		(card.layout === "transform" && card.type_line.includes("Siege"), index === 0 ? "siege" : "");
-					pushIfCondition		(card.layout === "split" && !card.keywords.includes("Aftermath"), "split");
-					pushIfCondition		(card.keywords.includes("Aftermath"), "aftermath");
+		const layouts = ["transform", "reversible_card", "modal_dfc", "art_series"];
+					pushIfCondition	(layouts.some((layout) => card.layout.includes(layout)), index === 1 ? "flip-card-back" : "flip-card-front");		
+					pushIfCondition	(card.layout === "transform" && card.type_line.includes("Siege"), index === 0 ? "siege" : "");
+					if (card.layout === "split") {
+						if (card.keywords.includes("Aftermath")) {
+							pushIfCondition(true, "aftermath");
+						} else {
+							pushIfCondition(true, "split");
+						}
+					}				
 		return classNames.join(" ");
 	};
 
@@ -245,40 +252,38 @@ const handleClose = () => {
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			<div className="cardContainer">
+				{isModalOpen && (
+					<div className="modal">
+						<button onClick={handleClose}>Close</button>
+						{clickedCardName} - Total Prints found: {totalPrints}
+						{isLoading && <span>Loading...</span>}
+						{errorMessageP && <div>{errorMessageP}</div>}
+						<div className="printsContainer">
+							{prints.map(print => (
+								<div key={print.id}>
+									<img
+										className="unique-print"
+										src={print.card_faces ? print.card_faces[0].image_uris.normal : print.image_uris.normal}
+										alt={print.name}
+									/>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
 				{cards.map(card => (
 					<div key={card.id} className="card">
-						{/* {card.name} */}
 						<div className="imgContainer"
 							onMouseOver={(e) => handleCardEvent(e, card.id)}
 							onMouseOut={(e) => handleCardEvent(e, card.id)}
 							onClick={(e) => handleCardEvent(e, card.id)}
 							onContextMenu={(e) => {
 								e.preventDefault();
-								handleDoubleClick(card.name);
+								handleRightClick(card.name);
 							}}
 						>
-							{isModalOpen && (
-								<div className="modal">
-									<button onClick={handleClose}>Close</button>
-										{card.name} - Total Prints found: {totalPrints}
-										{isLoading && <span>Loading...</span>}
-										{errorMessageP && <div>{errorMessageP}</div>}
-									<div className="printsContainer">
-										{prints.map(print => (
-											<div key={print.id}>
-												<img className="unique-print" src={print.image_uris.normal} alt={print.name} />
-											</div>
-										))}
-									</div>
-								</div>
-							)}
 							{renderImage(card)}
 						</div>
-						{/* Rarity: {card.rarity}
-						<br />
-						Layout: {card.layout}
-						<br />
-						Type Line: {card.type_line} */}
 					</div>
 				))}
 			</div>
@@ -287,7 +292,7 @@ const handleClose = () => {
 				{pageButtons.map((page) => (
 					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
 				))}
-				<button onClick={nextPage} disabled={currentPage === totalPages || !nextPageUrl || isLoading}>Next</button>
+				<button onClick={nextPage} disabled={currentPage === totalPages || isLoading}>Next</button>
 			</div>
     </div>
   );
