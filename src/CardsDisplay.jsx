@@ -292,7 +292,7 @@ const handleClose = () => {
 				{pageButtons.map((page) => (
 					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
 				))}
-				<button onClick={nextPage} disabled={currentPage === totalPages || isLoading}>Next</button>
+				<button onClick={nextPage} disabled={currentPage === totalPages || isLoading || !nextPageUrl}>Next</button>
 			</div>
     </div>
   );
