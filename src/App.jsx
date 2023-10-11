@@ -1,5 +1,5 @@
 import CardsDisplay from './CardsDisplay'
-import MTGlogo from "./assets/MTGlogo.png";
+import MTGlogo from "./assets/MTGlogoLight.png";
 import './App.css'
 
 function App() {

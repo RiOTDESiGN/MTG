@@ -1,20 +1,41 @@
+/* :root {
+  --body_bgc: transparent;
+  --body_text_color: #000000;
+
+  --card_bgc: transparent;
+  --card_border: transparent;
+
+  --dc_boxshadow: 0px 0px 100px 0px transparent
+  --dc_boxshadow_hover: 0px 0px 10px 0px transparent;
+  --dc_border_hover: 2px solid transparent;
+
+  --meld_border: 2px solid transparent;
+} */
+
+/* :root {
+  --body_bgc: rgb(49, 44, 40);
+  --body_text_color: #ebebeb;
+
+  --card_bgc: rgb(0, 0, 0);
+  --card_border: #1d1d1d;
+
+  --dc_boxshadow: 0px 0px 20px 0px #e8e9e9d0;
+  --dc_boxshadow_hover: 0px 0px 10px 0px #e8e9e9;
+  --dc_border_hover: 2px solid #e8e9e9;
+
+  --meld_border: 2px solid rgb(156, 120, 41);
+} */
+
 :root {
   --body_bgc: rgb(49, 44, 40);
-  --body_text_color: rgba(255, 255, 255, 0.87);
+  --body_text_color: #ebebeb;
 
-  --card_bgc: rgba(0, 0, 0);
-  --card_border: rgb(0, 0, 0);
+  --card_bgc: rgb(0, 0, 0);
+  --card_border: #1d1d1d;
 
-  --dc_boxshadow: 0px 0px 100px 0px rgba(156, 120, 41, 0.75);
+  --dc_boxshadow: 0px 0px 20px 0px rgb(156, 120, 75);
   --dc_boxshadow_hover: 0px 0px 10px 0px rgb(156, 120, 41);
   --dc_border_hover: 2px solid rgb(156, 120, 41);
-
-  /* --card_bgc: rgb(87, 87, 87);
-  --card_border: rgb(0, 0, 0); */
-
-  /* --dc_boxshadow: 0px 0px 100px 0px transparent
-  --dc_boxshadow_hover: 0px 0px 10px 0px transparent;
-  --dc_border_hover: 2px solid transparent; */
 
   --meld_border: 2px solid rgb(156, 120, 41);
 }
@@ -95,7 +116,7 @@ form {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--card_bgc);
+  background: var(--card_bgc);
   border: 2px solid var(--card_border);
   width: 342px;
   border-radius: 26px;
@@ -143,7 +164,7 @@ form {
   border-radius: 22px;
   transition: .2s;
   border: 2px solid transparent;
-  transform: perspective(700px) translateY(-4%) rotateX(25deg) scale(0.8);
+  transform: perspective(700px) translateY(-4%) rotateX(26deg) scale(0.8);
   box-shadow: var(--dc_boxshadow);
 }
 
