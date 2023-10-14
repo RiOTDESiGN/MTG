@@ -14,32 +14,47 @@ function CardsDisplay() {
 	const [isModalOpen, 		setModalOpen] 			= useState(false);
 	const [prints, 					setPrints] 					= useState([]);
 	const [totalPrints, 		setTotalPrints] 		= useState(0);
-	const [currentPage, 		setCurrentPage] 		= useState(1);
-	const [nextPageUrl, 		setNextPageUrl] 		= useState("");
+	const [nextPageUrl, 		setNextPageUrl] 		= useState(null);
+	const [prevPageUrl, 		setPrevPageUrl] 		= useState(null);
 	const [isLoading, 			setIsLoading] 			= useState(false);
 
 const resetStates = () => {
 	setCards([]);
 	setNextPageUrl(null);
+	setPrevPageUrl(null);
 	setSelectedSort("");
-	setTotalCards("0");
+	setTotalCards(0);
 	setErrorMessageC("");
 }
 
-	const searchCards = async () => {
+	const searchCards = async (urlToFetch) => {
 		console.log('Communicating with the API.');
 		setIsLoading(true);
 	
 		try {
-			let apiUrl = nextPageUrl ? nextPageUrl : `https://api.scryfall.com/cards/search?q=${query}`;
+			const apiUrl = urlToFetch || `https://api.scryfall.com/cards/search?q=${query}`;
 			const response = await axios.get(apiUrl);
+			console.log(response);
 
 			setCards(response.data.data);
 			setTotalCards(response.data.total_cards);
 
 			if (response.data.has_more) {
 				setNextPageUrl(response.data.next_page);
+			} else {
+				setNextPageUrl(null);
 			}
+
+			const url = new URL(apiUrl);
+			const page = url.searchParams.get("page");
+			
+			if (page && parseInt(page) > 1) {
+				url.searchParams.set("page", parseInt(page) - 1);
+				setPrevPageUrl(url.toString());
+			} else {
+				setPrevPageUrl(null);
+			}
+
 		} catch (error) {
 			const errorMessageC = error.response && error.response.status === 404
 				? "No cards found. Your search didn’t match any cards, please try again."
@@ -70,28 +85,6 @@ const resetStates = () => {
 
 	const cardsPerPage = 175;
 	const totalPages = Math.ceil(totalCards / cardsPerPage);
-	const pageButtons = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-	const goToPage = async (page) => {
-		setIsLoading(true);
-		setCurrentPage(page);
-		await searchCards();
-		setIsLoading(false);
-	};	
-
-	const nextPage = async () => {
-		setIsLoading(true);
-		setCurrentPage(prev => prev + 1);
-		await searchCards();
-		setIsLoading(false);
-	};
-	
-	const prevPage = async () => {
-		setIsLoading(true);
-		setCurrentPage(prev => prev - 1);
-		await searchCards();
-		setIsLoading(false);
-	};
 
 	const compareByLocale = (val1, val2) => {
 		if (val1 === undefined || val2 === undefined) return 0;
@@ -238,7 +231,7 @@ const handleClose = () => {
 					<button>Search</button>
 				</form>
 				<div className="total-cards">
-					Total Cards found: {totalCards}
+					{totalCards} cards over {totalPages} pages.
 				</div>
 			</div>
 			<div className="sorting">
@@ -289,11 +282,8 @@ const handleClose = () => {
 				))}
 			</div>
 			<div className="pagination">
-				<button onClick={prevPage} disabled={currentPage === 1 || isLoading}>Previous</button>
-				{pageButtons.map((page) => (
-					<button key={page} onClick={() => goToPage(page)} disabled={currentPage === page}>{page}</button>
-				))}
-				<button onClick={nextPage} disabled={currentPage === totalPages || isLoading || !nextPageUrl}>Next</button>
+				<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>Previous</button>
+				<button onClick={() => searchCards(nextPageUrl)} disabled={nextPageUrl === null || isLoading}>Next</button>
 			</div>
     </div>
   );
