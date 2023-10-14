@@ -18,15 +18,16 @@ function CardsDisplay() {
 	const [nextPageUrl, 		setNextPageUrl] 		= useState("");
 	const [isLoading, 			setIsLoading] 			= useState(false);
 
+const resetStates = () => {
+	setCards([]);
+	setNextPageUrl(null);
+	setSelectedSort("");
+	setTotalCards("0");
+	setErrorMessageC("");
+}
+
 	const searchCards = async () => {
 		console.log('Communicating with the API.');
-	
-		setCards([]);
-		setNextPageUrl(null);
-		setSelectedSort("");
-		setTotalCards("0");
-		setErrorMessageC("");
-	
 		setIsLoading(true);
 	
 		try {
@@ -47,7 +48,6 @@ function CardsDisplay() {
 			setErrorMessageC(errorMessageC);
 		} finally {
 			setIsLoading(false);
-			setQuery("");
 		}
 	};
 
@@ -227,6 +227,7 @@ const handleClose = () => {
 			<div className="searchfield">
 				<form onSubmit={(e) => {
 					e.preventDefault();
+						resetStates();
 						searchCards();}}>
 					<input
 						type="text"
@@ -234,7 +235,7 @@ const handleClose = () => {
 						placeholder="Search by name.."
 						onChange={e => setQuery(e.target.value)}
 					/>
-					<button onClick={searchCards}>Search</button>
+					<button>Search</button>
 				</form>
 				<div className="total-cards">
 					Total Cards found: {totalCards}
