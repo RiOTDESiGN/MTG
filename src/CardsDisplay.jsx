@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 
 function CardsDisplay() {
@@ -18,51 +18,60 @@ function CardsDisplay() {
 	const [prevPageUrl, 		setPrevPageUrl] 		= useState(null);
 	const [isLoading, 			setIsLoading] 			= useState(false);
 
-const resetStates = () => {
-	setCards([]);
-	setNextPageUrl(null);
-	setPrevPageUrl(null);
-	setSelectedSort("");
-	setTotalCards(0);
-	setErrorMessageC("");
-}
+	const resetStates = () => {
+		setCards([]);
+		setNextPageUrl(null);
+		setPrevPageUrl(null);
+		setSelectedSort("");
+		setTotalCards(0);
+		setErrorMessageC("");
+	}
+
+	const searchCardsCache = useRef({});
 
 	const searchCards = async (urlToFetch) => {
-		console.log('Communicating with the API.');
 		setIsLoading(true);
 	
 		try {
 			const apiUrl = urlToFetch || `https://api.scryfall.com/cards/search?q=${query}`;
-			const response = await axios.get(apiUrl);
-			console.log(response);
-
-			setCards(response.data.data);
-			setTotalCards(response.data.total_cards);
-
-			if (response.data.has_more) {
-				setNextPageUrl(response.data.next_page);
-			} else {
-				setNextPageUrl(null);
-			}
-
 			const url = new URL(apiUrl);
-			const page = url.searchParams.get("page");
-			
-			if (page && parseInt(page) > 1) {
-				url.searchParams.set("page", parseInt(page) - 1);
-				setPrevPageUrl(url.toString());
+			const page = url.searchParams.get("page") || '1';
+			const cacheKey = `q=${query}_page=${page}`;
+			console.log("Cache Key: ", cacheKey);
+	
+			let responseData;
+	
+			if (searchCardsCache[cacheKey]) {
+				responseData = searchCardsCache[cacheKey];
+				console.log("Using cache");
+			} else {
+				responseData = await axios.get(apiUrl).then(res => res.data);
+				searchCardsCache[cacheKey] = responseData;
+				console.log("API call made");
+			}
+	
+			const { data, total_cards, has_more, next_page } = responseData;
+			setCards(data);
+			setTotalCards(total_cards);
+			setNextPageUrl(has_more ? next_page : null);
+	
+			if (page) {
+				const pageInt = parseInt(page);
+				url.searchParams.set("page", pageInt > 1 ? pageInt - 1 : null);
+				setPrevPageUrl(pageInt > 1 ? url.toString() : null);
 			} else {
 				setPrevPageUrl(null);
 			}
-
+	
 		} catch (error) {
-			const errorMessageC = error.response && error.response.status === 404
+			const errorMessageC = error.response?.status === 404
 				? "No cards found. Your search didn’t match any cards, please try again."
 				: "An error occurred";
-			
+	
 			setErrorMessageC(errorMessageC);
 		} finally {
 			setIsLoading(false);
+			console.log("Current cache state:", searchCardsCache);
 		}
 	};
 
