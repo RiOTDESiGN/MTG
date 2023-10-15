@@ -8,6 +8,7 @@ function CardsDisplay() {
   const [cards, 					setCards] 					= useState([]);
 	const [totalCards, 			setTotalCards] 			= useState(0);
 	const [selectedSort, 		setSelectedSort] 		= useState("");
+	const [selectedColors, 	setSelectedColors] 	= useState([]);
 	const [hoveredCard, 		setHoveredCard] 		= useState("");
 	const [activeCards, 		setActiveCards] 		= useState([]);
 	const [clickedCardName, setClickedCardName] = useState('');
@@ -29,25 +30,36 @@ function CardsDisplay() {
 
 	const searchCardsCache = useRef({});
 
+	const Pagination = 
+		<div className="pagination">
+			<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>Previous</button>
+			<button onClick={() => searchCards(nextPageUrl)} disabled={nextPageUrl === null || isLoading}>Next</button>
+		</div>;
+
 	const searchCards = async (urlToFetch) => {
 		setIsLoading(true);
 	
 		try {
-			const apiUrl = urlToFetch || `https://api.scryfall.com/cards/search?q=${query}`;
+			let apiUrl = urlToFetch;
+			if (!apiUrl) {
+				apiUrl = `https://api.scryfall.com/cards/search?q=${query}`;
+				if (selectedColors.length) {
+					apiUrl += `+c=${selectedColors.join("")}`;
+				}
+			}
 			const url = new URL(apiUrl);
 			const page = url.searchParams.get("page") || '1';
 			const cacheKey = `q=${query}_page=${page}`;
-			console.log("Cache Key: ", cacheKey);
 	
 			let responseData;
 	
 			if (searchCardsCache[cacheKey]) {
 				responseData = searchCardsCache[cacheKey];
-				console.log("Using cache");
+				console.log("Fetching from cache");
 			} else {
 				responseData = await axios.get(apiUrl).then(res => res.data);
 				searchCardsCache[cacheKey] = responseData;
-				console.log("API call made");
+				console.log("Fetching from API");
 			}
 	
 			const { data, total_cards, has_more, next_page } = responseData;
@@ -77,7 +89,7 @@ function CardsDisplay() {
 
 	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
-		console.log('Communicating with the API.');
+		console.log('Fetching from API');
 	
 		try {
 			let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=!"${nameToSearch}"+include:extras&unique=prints`;
@@ -224,6 +236,25 @@ const handleClose = () => {
 		return null;
 	};
 
+	const colorMapping = {
+  'W': '#f9faf5',
+  'U': '#0f68ab',
+  'R': '#d31e2a',
+  'B': '#160b00',
+  'G': '#00743f'
+};
+	const colorOptions = ['W', 'U', 'R', 'B', 'G'];
+
+	const handleColorChange = (e) => {
+		const value = e.target.value;
+		
+		setSelectedColors(prevState =>
+			prevState.includes(value)
+				? prevState.filter(color => color !== value)
+				: [...prevState, value]
+		);
+	};	
+
   return (
     <div>
 			<div className="searchfield">
@@ -238,12 +269,27 @@ const handleClose = () => {
 						onChange={e => setQuery(e.target.value)}
 					/>
 					<button>Search</button>
-				</form>
-				<div className="total-cards">
 					{totalCards} cards over {totalPages} pages.
-				</div>
+				</form>
+				{Pagination}
 			</div>
 			<div className="sorting">
+				<div className="color-options">
+					{colorOptions.map((colorCode, index) => (
+						<label key={index}>
+							<div 
+								className="checkbox-container" 
+								style={{ backgroundColor: colorMapping[colorCode] }}
+							>
+								<input
+									type="checkbox"
+									value={colorCode}
+									onChange={handleColorChange}
+								/>
+							</div>
+						</label>
+					))}
+				</div>
 				<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
 					<option value="" disabled>Sort by..</option>
 					<option value="rarity">Sort by Rarity</option>
@@ -290,10 +336,7 @@ const handleClose = () => {
 					</div>
 				))}
 			</div>
-			<div className="pagination">
-				<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>Previous</button>
-				<button onClick={() => searchCards(nextPageUrl)} disabled={nextPageUrl === null || isLoading}>Next</button>
-			</div>
+			{Pagination}
     </div>
   );
 }
