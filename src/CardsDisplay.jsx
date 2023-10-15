@@ -33,7 +33,7 @@ function CardsDisplay() {
 	const Pagination = 
 		<div className="pagination">
 			<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>Previous</button>
-			<button onClick={() => searchCards(nextPageUrl)} disabled={nextPageUrl === null || isLoading}>Next</button>
+			<button onClick={() => { setCards([]); searchCards(nextPageUrl); }} disabled={nextPageUrl === null || isLoading}>Next</button>
 		</div>;
 
 	const searchCards = async (urlToFetch) => {
@@ -49,7 +49,7 @@ function CardsDisplay() {
 			}
 			const url = new URL(apiUrl);
 			const page = url.searchParams.get("page") || '1';
-			const cacheKey = `q=${query}_page=${page}`;
+			const cacheKey = `q=${query}_${selectedColors}_page=${page}`;
 	
 			let responseData;
 	
@@ -78,7 +78,7 @@ function CardsDisplay() {
 		} catch (error) {
 			const errorMessageC = error.response?.status === 404
 				? "No cards found. Your search didn’t match any cards, please try again."
-				: "An error occurred";
+				: "Please type at least one letter in the searchbox, or select at least one color to search for.";
 	
 			setErrorMessageC(errorMessageC);
 		} finally {
@@ -118,6 +118,13 @@ function CardsDisplay() {
 				return compareByLocale(aColors.join(''), bColors.join(''));
 			};
 		}
+		if (criteria === 'cmc') {
+			return (a, b) => {
+				const aCost = parseInt(a[criteria] || '0', 10);
+				const bCost = parseInt(b[criteria] || '0', 10);
+				return aCost - bCost;
+			};
+		}
 		return (a, b) => compareByLocale(a[criteria], b[criteria]);
 	};
 	
@@ -125,7 +132,7 @@ function CardsDisplay() {
 		const comparator = getComparator(criteria);
 		const sortedCards = [...cards].sort(comparator);
 		setCards(sortedCards);
-	};	
+	};
 
 const handleCardEvent = (event, cardId) => {
 	if (isModalOpen) return;
@@ -295,6 +302,7 @@ const handleClose = () => {
 					<option value="rarity">Sort by Rarity</option>
 					<option value="layout">Sort by Layout</option>
 					<option value="name">Sort by Name</option>
+					<option value="cmc">Sort by Mana Cost</option>
 					<option value="color_identity">Sort by Color</option>
 				</select>
 			</div>

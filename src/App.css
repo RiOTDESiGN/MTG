@@ -173,7 +173,6 @@ form {
   top: 0;
   right: 0;
 }
-
 .printsContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, 300px);
@@ -192,16 +191,10 @@ form {
   transform: perspective(700px) translateY(-4%) rotateX(26deg) scale(0.8);
   box-shadow: var(--dc_boxshadow);
 }
-
 .hovered img {
   transform: scale(1);
   border: var(--dc_border_hover);
   box-shadow: var(--dc_boxshadow_hover);
-}
-
-.aftermath:hover,
-.split:hover {
-  cursor: pointer;
 }
 
 .aftermath, .split {
@@ -210,13 +203,18 @@ form {
   image-rendering: crisp-edges;
   transition: .3s;
 }
+.split {
+  transform: rotate(90deg);
+}
 .aftermath:active {
   transform: rotate(-90deg);
+}
+.aftermath:hover,
+.split:hover {
   z-index: 1;
 }
-.split:active {
-  transform: rotate(90deg);
-  z-index: 1;
+.aftermath:hover {
+  cursor: pointer;
 }
 
 .meldCardTitle {
@@ -230,11 +228,9 @@ form {
   height: 465px;
   perspective: 1200px;
 }
-
 .flip-card {
   transform-style: preserve-3d;
 }
-
 .flipped {
   animation: flip 1s ease-in forwards;
 }
@@ -246,7 +242,6 @@ form {
    85% {transform: rotateY(175deg);}
   100% {transform: rotateY(180deg);}
 }
-
 .flipped-back {
   animation: flip-back .7s ease-in forwards;
 }
@@ -258,7 +253,6 @@ form {
    85% {transform: rotateY(5deg);}
   100% {transform: rotateY(0deg);}
 }
-
 .flip-card-front,
 .flip-card-back {
   position: absolute;
