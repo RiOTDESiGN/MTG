@@ -108,9 +108,11 @@ function CardsDisplay() {
 	const totalPages = Math.ceil(totalCards / cardsPerPage);
 
 	const compareByLocale = (val1, val2) => {
-		if (val1 === undefined || val2 === undefined) return 0;
-		return val1.localeCompare(val2);
-	};
+    if (val1 === undefined || val2 === undefined) return 0;
+    const strippedVal1 = val1.startsWith("A-") ? val1.substring(2) : val1;
+    const strippedVal2 = val2.startsWith("A-") ? val2.substring(2) : val2;
+    return strippedVal1.localeCompare(strippedVal2);
+};
 	
 	const getComparator = (criteria) => {
 		if (criteria === 'color_identity') {
@@ -128,11 +130,36 @@ function CardsDisplay() {
 		return (a, b) => compareByLocale(a[criteria], b[criteria]);
 	};
 	
-	const sortCards = (criteria) => {
-		const comparator = getComparator(criteria);
-		const sortedCards = [...cards].sort(comparator);
-		setCards(sortedCards);
-	};
+	const rarityOrder = {
+    common: 0,
+    uncommon: 1,
+    rare: 2,
+    mythic: 3,
+};
+
+const compareByRarity = (val1, val2) => {
+    if (val1 === undefined || val2 === undefined) return 0;
+    const rarityValue1 = rarityOrder[val1];
+    const rarityValue2 = rarityOrder[val2];
+
+    if (rarityValue1 === undefined || rarityValue2 === undefined) {
+        return val1.localeCompare(val2);
+    }
+
+    return rarityValue1 - rarityValue2;
+};
+
+const sortCards = (criteria) => {
+	let comparator;
+	if (criteria === 'rarity') {
+			comparator = (a, b) => compareByRarity(a[criteria], b[criteria]);
+	} else {
+			comparator = getComparator(criteria);
+	}
+
+	const sortedCards = [...cards].sort(comparator);
+	setCards(sortedCards);
+};
 
 const handleCardEvent = (event, cardId) => {
 	if (isModalOpen) return;
@@ -276,7 +303,7 @@ const handleClose = () => {
 						onChange={e => setQuery(e.target.value)}
 					/>
 					<button>Search</button>
-					{totalCards} cards over {totalPages} pages.
+					{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}
 				</form>
 				{Pagination}
 			</div>
@@ -341,6 +368,9 @@ const handleClose = () => {
 						>
 							{renderImage(card)}
 						</div>
+						Rarity: {card.rarity}
+						<br />
+						Layout: {card.layout}
 					</div>
 				))}
 			</div>
