@@ -38,6 +38,8 @@
   --dc_border_hover: 2px solid rgb(156, 120, 41);
 
   --meld_border: 2px solid rgb(156, 120, 41);
+
+  --button_hover: rgb(156, 120, 41);
 }
 
 body {
@@ -54,10 +56,36 @@ button, input, select {
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
   height: 40px;
-  width: 100px;
+  width: 80px;
+  transition: .1s;
+}
+button:hover {
+  background-color: var(--button_hover);
+}
+button:active {
+  transform: scale(.95);
+  color: var(--body_text_color);
+}
+button:disabled {
+  pointer-events: none;
 }
 input, select {
-  width: 208px;
+  width: 228px;
+}
+.currentPage {
+  padding: 5px 8px;
+  margin: 4px;
+  border: 2px solid rgb(0, 0, 0);
+  border-radius: 6px;
+  height: 40px;
+  width: 52px;
+  color: var(--body_text_color);
+  background-color: rgb(0, 0, 0);
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
 }
 
 .checkbox-container label {
@@ -86,6 +114,7 @@ input[type="checkbox"] {
 
 .searchfield {
   display: flex;
+  flex-direction: column;
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -108,8 +137,14 @@ form {
   padding-bottom: 40px;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
 .sorting {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
 }

@@ -15,6 +15,8 @@ function CardsDisplay() {
 	const [isModalOpen, 		setModalOpen] 			= useState(false);
 	const [prints, 					setPrints] 					= useState([]);
 	const [totalPrints, 		setTotalPrints] 		= useState(0);
+	const [cardsPerPage, 		setCardsPerPage] 		= useState(50);
+	const [currentPage,			setCurrentPage]			= useState(1);
 	const [nextPageUrl, 		setNextPageUrl] 		= useState(null);
 	const [prevPageUrl, 		setPrevPageUrl] 		= useState(null);
 	const [isLoading, 			setIsLoading] 			= useState(false);
@@ -30,62 +32,138 @@ function CardsDisplay() {
 
 	const searchCardsCache = useRef({});
 
+	const handleCardsPerPageChange = (newCardsPerPage) => {
+		setCardsPerPage(newCardsPerPage);
+		setCurrentPage(1);  // Reset current page to 1
+	};
+	
+	const displayedCards = cards.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage);
+
+
+	// const cardsPerPage = 175;
+	const totalPages = Math.ceil(totalCards / cardsPerPage);
+
 	const Pagination = 
 		<div className="pagination">
-			<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>Previous</button>
-			<button onClick={() => { setCards([]); searchCards(nextPageUrl); }} disabled={nextPageUrl === null || isLoading}>Next</button>
+			<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>&lt;&lt;</button>
+			<div className="currentPage">{currentPage}</div>
+			<button onClick={() => { setCards([]); searchCards(nextPageUrl); }} disabled={nextPageUrl === null || isLoading}>&gt;&gt;</button>
 		</div>;
 
-	const searchCards = async (urlToFetch) => {
-		setIsLoading(true);
+	// const searchCards = async (apiUrl) => {
+	// 	setIsLoading(true);
 	
-		try {
-			let apiUrl = urlToFetch;
-			if (!apiUrl) {
-				apiUrl = `https://api.scryfall.com/cards/search?q=${query}`;
-				if (selectedColors.length) {
-					apiUrl += `+c=${selectedColors.join("")}`;
-				}
-			}
-			const url = new URL(apiUrl);
-			const page = url.searchParams.get("page") || '1';
-			const cacheKey = `q=${query}_${selectedColors}_page=${page}`;
+	// 	try {
+	// 		if (!apiUrl) {
+	// 			apiUrl = `https://api.scryfall.com/cards/search?q="${query}"`;
+	// 			if (selectedColors.length) {
+	// 				apiUrl += `+c=${selectedColors.join("")}`;
+	// 			}
+	// 		}
+	// 		const url = new URL(apiUrl);
+	// 		const page = url.searchParams.get("page") || '1';
+	// 		setCurrentPage(page);
+	// 		const cacheKey = `query=${query}_colors=${selectedColors}_page=${page}`;
 	
-			let responseData;
+	// 		let responseData;
 	
-			if (searchCardsCache[cacheKey]) {
-				responseData = searchCardsCache[cacheKey];
-				console.log("Fetching from cache");
-			} else {
-				responseData = await axios.get(apiUrl).then(res => res.data);
-				searchCardsCache[cacheKey] = responseData;
-				console.log("Fetching from API");
-			}
+	// 		if (searchCardsCache[cacheKey]) {
+	// 			responseData = searchCardsCache[cacheKey];
+	// 			console.log("Fetching from cache");
+	// 		} else {
+	// 			responseData = await axios.get(apiUrl).then(res => res.data);
+	// 			searchCardsCache[cacheKey] = responseData;
+	// 			console.log("Fetching from API");
+	// 		}
 	
-			const { data, total_cards, has_more, next_page } = responseData;
-			setCards(data);
-			setTotalCards(total_cards);
-			setNextPageUrl(has_more ? next_page : null);
+	// 		const { data, total_cards, has_more, next_page } = responseData;
+	// 		setCards(data);
+	// 		setTotalCards(total_cards);
+	// 		setNextPageUrl(has_more ? next_page : null);
 	
-			if (page) {
-				const pageInt = parseInt(page);
-				url.searchParams.set("page", pageInt > 1 ? pageInt - 1 : null);
-				setPrevPageUrl(pageInt > 1 ? url.toString() : null);
-			} else {
-				setPrevPageUrl(null);
-			}
+	// 		if (page) {
+	// 			const pageInt = parseInt(page);
+	// 			url.searchParams.set("page", pageInt > 1 ? pageInt - 1 : null);
+	// 			setPrevPageUrl(pageInt > 1 ? url.toString() : null);
+	// 		} else {
+	// 			setPrevPageUrl(null);
+	// 		}
 	
-		} catch (error) {
-			const errorMessageC = error.response?.status === 404
-				? "No cards found. Your search didn’t match any cards, please try again."
-				: "Please type at least one letter in the searchbox, or select at least one color to search for.";
+	// 	} catch (error) {
+	// 		const errorMessageC = error.response?.status === 404
+	// 			? "No cards found. Your search didn’t match any cards, please try again."
+	// 			: "Please type at least one letter in the searchbox, or select at least one color to search for.";
 	
-			setErrorMessageC(errorMessageC);
-		} finally {
-			setIsLoading(false);
-			console.log("Current cache state:", searchCardsCache);
-		}
-	};
+	// 		setErrorMessageC(errorMessageC);
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 		console.log("Current cache state:", searchCardsCache);
+	// 	}
+	// };
+
+
+
+// Create Cache Key
+const createCacheKey = (query, selectedColors, page) => `query=${query}_colors=${selectedColors}_page=${page}`;
+
+// Get Error Message
+const getErrorMessage = (error) => {
+  return error.response?.status === 404
+    ? "No cards found. Your search didn’t match any cards, please try again."
+    : "Please type at least one letter in the searchbox, or select at least one color to search for.";
+};
+
+// Fetch Data
+const fetchData = async (apiUrl, cacheKey, cache) => {
+  if (cache[cacheKey]) {
+    console.log("Fetching from cache");
+    return cache[cacheKey];
+  }
+  
+  const data = await axios.get(apiUrl).then(res => res.data);
+  cache[cacheKey] = data;
+  console.log("Fetching from API");
+  return data;
+};
+
+// The main function
+const searchCards = async (initialApiUrl) => {
+  setIsLoading(true);
+  const cards = [];
+
+  try {
+    let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q="${query}"`;
+
+    if (selectedColors.length) {
+      apiUrl += `+c=${selectedColors.join("")}`;
+    }
+
+    do {
+      const url = new URL(apiUrl);
+      const page = url.searchParams.get("page") || '1';
+      const cacheKey = createCacheKey(query, selectedColors, page);
+      const { data, has_more, next_page } = await fetchData(apiUrl, cacheKey, searchCardsCache);
+
+      cards.push(...data);
+      apiUrl = has_more ? next_page : null;
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+    } while(apiUrl);
+
+    setCards(cards);
+    setTotalCards(cards.length);
+
+  } catch (error) {
+    const errorMessageC = getErrorMessage(error);
+    setErrorMessageC(errorMessageC);
+  } finally {
+    setIsLoading(false);
+    console.log("Current cache state:", searchCardsCache);
+  }
+};
+
+
 
 	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
@@ -103,9 +181,6 @@ function CardsDisplay() {
 			setIsLoading(false);
 		}
 	};
-
-	const cardsPerPage = 175;
-	const totalPages = Math.ceil(totalCards / cardsPerPage);
 
 	const compareByLocale = (val1, val2) => {
     if (val1 === undefined || val2 === undefined) return 0;
@@ -291,48 +366,58 @@ const handleClose = () => {
 
   return (
     <div>
-			<div className="searchfield">
-				<form onSubmit={(e) => {
-					e.preventDefault();
-						resetStates();
-						searchCards();}}>
-					<input
-						type="text"
-						value={query}
-						placeholder="Search by name.."
-						onChange={e => setQuery(e.target.value)}
-					/>
-					<button>Search</button>
-					{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}
-				</form>
-				{Pagination}
-			</div>
-			<div className="sorting">
-				<div className="color-options">
-					{colorOptions.map((colorCode, index) => (
-						<label key={index}>
-							<div 
-								className="checkbox-container" 
-								style={{ backgroundColor: colorMapping[colorCode] }}
-							>
-								<input
-									type="checkbox"
-									value={colorCode}
-									onChange={handleColorChange}
-								/>
-							</div>
-						</label>
-					))}
+			<div className="controls">
+				<div className="searchfield">
+					<form onSubmit={(e) => {
+						e.preventDefault();
+							resetStates();
+							searchCards();}}>
+						<input
+							type="text"
+							value={query}
+							placeholder="Search by name.."
+							onChange={e => setQuery(e.target.value)}
+						/>
+						<button>Search</button>
+					</form>
+					<div className="color-options">
+						{colorOptions.map((colorCode, index) => (
+							<label key={index}>
+								<div 
+									className="checkbox-container" 
+									style={{ backgroundColor: colorMapping[colorCode] }}
+								>
+									<input
+										type="checkbox"
+										value={colorCode}
+										onChange={handleColorChange}
+									/>
+								</div>
+							</label>
+						))}
+					</div>
 				</div>
-				<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
-					<option value="" disabled>Sort by..</option>
-					<option value="rarity">Sort by Rarity</option>
-					<option value="layout">Sort by Layout</option>
-					<option value="name">Sort by Name</option>
-					<option value="cmc">Sort by Mana Cost</option>
-					<option value="color_identity">Sort by Color</option>
-				</select>
+				<div className="sorting">
+					<select onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
+						<option value={50}>50</option>
+						<option value={100}>100</option>
+						<option value={200}>200</option>
+					</select>
+					<button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+					<button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= cards.length}>Next</button>
+
+					{Pagination}
+					<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
+						<option value="" disabled>Sort by..</option>
+						<option value="rarity">Sort by Rarity</option>
+						<option value="layout">Sort by Layout</option>
+						<option value="name">Sort by Name</option>
+						<option value="cmc">Sort by Mana Cost</option>
+						<option value="color_identity">Sort by Color</option>
+					</select>
+				</div>
 			</div>
+			<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			<div className="cardContainer">
@@ -355,7 +440,7 @@ const handleClose = () => {
 						</div>
 					</div>
 				)}
-				{cards.map(card => (
+				{displayedCards.map(card => (
 					<div key={card.id} className="card">
 						<div className="imgContainer"
 							onMouseOver={(e) => handleCardEvent(e, card.id)}
