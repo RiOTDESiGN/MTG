@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 function CardsDisplay() {
@@ -9,6 +9,8 @@ function CardsDisplay() {
 	const [totalCards, 			setTotalCards] 			= useState(0);
 	const [selectedSort, 		setSelectedSort] 		= useState("");
 	const [selectedColors, 	setSelectedColors] 	= useState([]);
+	const [filteredColors, 	setFilteredColors] 	= useState([]);
+	const [filteredCards, 	setFilteredCards] 	= useState([]);
 	const [hoveredCard, 		setHoveredCard] 		= useState("");
 	const [activeCards, 		setActiveCards] 		= useState([]);
 	const [clickedCardName, setClickedCardName] = useState('');
@@ -17,14 +19,10 @@ function CardsDisplay() {
 	const [totalPrints, 		setTotalPrints] 		= useState(0);
 	const [cardsPerPage, 		setCardsPerPage] 		= useState(50);
 	const [currentPage,			setCurrentPage]			= useState(1);
-	const [nextPageUrl, 		setNextPageUrl] 		= useState(null);
-	const [prevPageUrl, 		setPrevPageUrl] 		= useState(null);
 	const [isLoading, 			setIsLoading] 			= useState(false);
 
 	const resetStates = () => {
 		setCards([]);
-		setNextPageUrl(null);
-		setPrevPageUrl(null);
 		setSelectedSort("");
 		setTotalCards(0);
 		setErrorMessageC("");
@@ -34,73 +32,12 @@ function CardsDisplay() {
 
 	const handleCardsPerPageChange = (newCardsPerPage) => {
 		setCardsPerPage(newCardsPerPage);
-		setCurrentPage(1);  // Reset current page to 1
+		setCurrentPage(1);
 	};
 	
-	const displayedCards = cards.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage);
+// console.log(currentPage);
 
-
-	// const cardsPerPage = 175;
-	const totalPages = Math.ceil(totalCards / cardsPerPage);
-
-	const Pagination = 
-		<div className="pagination">
-			<button onClick={() => searchCards(prevPageUrl)} disabled={!prevPageUrl || isLoading}>&lt;&lt;</button>
-			<div className="currentPage">{currentPage}</div>
-			<button onClick={() => { setCards([]); searchCards(nextPageUrl); }} disabled={nextPageUrl === null || isLoading}>&gt;&gt;</button>
-		</div>;
-
-	// const searchCards = async (apiUrl) => {
-	// 	setIsLoading(true);
-	
-	// 	try {
-	// 		if (!apiUrl) {
-	// 			apiUrl = `https://api.scryfall.com/cards/search?q="${query}"`;
-	// 			if (selectedColors.length) {
-	// 				apiUrl += `+c=${selectedColors.join("")}`;
-	// 			}
-	// 		}
-	// 		const url = new URL(apiUrl);
-	// 		const page = url.searchParams.get("page") || '1';
-	// 		setCurrentPage(page);
-	// 		const cacheKey = `query=${query}_colors=${selectedColors}_page=${page}`;
-	
-	// 		let responseData;
-	
-	// 		if (searchCardsCache[cacheKey]) {
-	// 			responseData = searchCardsCache[cacheKey];
-	// 			console.log("Fetching from cache");
-	// 		} else {
-	// 			responseData = await axios.get(apiUrl).then(res => res.data);
-	// 			searchCardsCache[cacheKey] = responseData;
-	// 			console.log("Fetching from API");
-	// 		}
-	
-	// 		const { data, total_cards, has_more, next_page } = responseData;
-	// 		setCards(data);
-	// 		setTotalCards(total_cards);
-	// 		setNextPageUrl(has_more ? next_page : null);
-	
-	// 		if (page) {
-	// 			const pageInt = parseInt(page);
-	// 			url.searchParams.set("page", pageInt > 1 ? pageInt - 1 : null);
-	// 			setPrevPageUrl(pageInt > 1 ? url.toString() : null);
-	// 		} else {
-	// 			setPrevPageUrl(null);
-	// 		}
-	
-	// 	} catch (error) {
-	// 		const errorMessageC = error.response?.status === 404
-	// 			? "No cards found. Your search didn’t match any cards, please try again."
-	// 			: "Please type at least one letter in the searchbox, or select at least one color to search for.";
-	
-	// 		setErrorMessageC(errorMessageC);
-	// 	} finally {
-	// 		setIsLoading(false);
-	// 		console.log("Current cache state:", searchCardsCache);
-	// 	}
-	// };
-
+// console.log(cardsPerPage);
 
 
 // Create Cache Key
@@ -132,7 +69,7 @@ const searchCards = async (initialApiUrl) => {
   const cards = [];
 
   try {
-    let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q="${query}"`;
+    let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
 
     if (selectedColors.length) {
       apiUrl += `+c=${selectedColors.join("")}`;
@@ -152,7 +89,7 @@ const searchCards = async (initialApiUrl) => {
     } while(apiUrl);
 
     setCards(cards);
-    setTotalCards(cards.length);
+    setCurrentPage(1);
 
   } catch (error) {
     const errorMessageC = getErrorMessage(error);
@@ -162,8 +99,6 @@ const searchCards = async (initialApiUrl) => {
     console.log("Current cache state:", searchCardsCache);
   }
 };
-
-
 
 	const searchPrints = async (nameToSearch = clickedCardName) => {		
 		setIsLoading(true);
@@ -187,12 +122,22 @@ const searchCards = async (initialApiUrl) => {
     const strippedVal1 = val1.startsWith("A-") ? val1.substring(2) : val1;
     const strippedVal2 = val2.startsWith("A-") ? val2.substring(2) : val2;
     return strippedVal1.localeCompare(strippedVal2);
-};
+	};
+	
+	const colorOrder = {
+		W: 0,
+		U: 1,
+		B: 2,
+		R: 3,
+		G: 4,
+	};
 	
 	const getComparator = (criteria) => {
 		if (criteria === 'color_identity') {
 			return ({ color_identity: aColors = [] }, { color_identity: bColors = [] }) => {
-				return compareByLocale(aColors.join(''), bColors.join(''));
+				const aScore = aColors.reduce((acc, color) => acc + colorOrder[color], 0);
+				const bScore = bColors.reduce((acc, color) => acc + colorOrder[color], 0);
+				return aScore - bScore;
 			};
 		}
 		if (criteria === 'cmc') {
@@ -203,14 +148,14 @@ const searchCards = async (initialApiUrl) => {
 			};
 		}
 		return (a, b) => compareByLocale(a[criteria], b[criteria]);
-	};
+	};	
 	
 	const rarityOrder = {
     common: 0,
     uncommon: 1,
     rare: 2,
     mythic: 3,
-};
+	};
 
 const compareByRarity = (val1, val2) => {
     if (val1 === undefined || val2 === undefined) return 0;
@@ -235,6 +180,36 @@ const sortCards = (criteria) => {
 	const sortedCards = [...cards].sort(comparator);
 	setCards(sortedCards);
 };
+
+useEffect(() => {
+	const newFilteredCards = cards.filter(card => !card.color_identity.some(color => filteredColors.includes(color)));
+	
+	setTotalCards(newFilteredCards.length);
+	setFilteredCards(newFilteredCards);
+
+	if (currentPage * cardsPerPage >= newFilteredCards.length) {
+		setCurrentPage(Math.ceil(newFilteredCards.length / cardsPerPage));
+	}
+
+}, [filteredColors, cards, cardsPerPage, currentPage]);
+
+const displayedCards = filteredCards.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage);
+const totalPages = Math.ceil(totalCards / cardsPerPage);
+
+	const Pagination = 
+		<div className="pagination">
+			<select className="cards-per-page" onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
+				<option value={50}>50</option>
+				<option value={100}>100</option>
+				<option value={250}>250</option>
+				<option value={500}>500</option>
+				<option value={1000}>1000</option>
+			</select>
+			<button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0 || currentPage === 1}>Previous</button>
+			<div className="currentPage">{currentPage}</div>
+			<button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= totalCards}>Next</button>
+		</div>;
+
 
 const handleCardEvent = (event, cardId) => {
 	if (isModalOpen) return;
@@ -273,7 +248,7 @@ const handleClose = () => {
 		const classNames = ["displayCard"];
 		if (card.id === hoveredCard) {classNames.push("hovered");}
 		const pushIfCondition = (condition, className) => condition && classNames.push(className);
-		const layouts = ["transform", "reversible_card", "modal_dfc", "art_series"];
+		const layouts = ["transform", "reversible_card", "modal_dfc", "art_series", "double_faced_token"];
 					pushIfCondition	(layouts.some((layout) => card.layout.includes(layout)), index === 1 ? "flip-card-back" : "flip-card-front");		
 					pushIfCondition	(card.layout === "transform" && card.type_line.includes("Siege"), index === 0 ? "siege" : "");
 					if (card.layout === "split") {
@@ -348,11 +323,11 @@ const handleClose = () => {
 	const colorMapping = {
   'W': '#f9faf5',
   'U': '#0f68ab',
+	'B': '#160b00',
   'R': '#d31e2a',
-  'B': '#160b00',
   'G': '#00743f'
 };
-	const colorOptions = ['W', 'U', 'R', 'B', 'G'];
+	const colorOptions = ['W', 'U', 'B', 'R', 'G'];
 
 	const handleColorChange = (e) => {
 		const value = e.target.value;
@@ -362,7 +337,25 @@ const handleClose = () => {
 				? prevState.filter(color => color !== value)
 				: [...prevState, value]
 		);
-	};	
+	};
+
+	const handleColorFilterChange = (color) => {
+		setFilteredColors(prevFilteredColors => {
+			if (prevFilteredColors.includes(color)) {
+				return prevFilteredColors.filter(c => c !== color);
+			} else {
+				return [...prevFilteredColors, color];
+			}
+		});
+	};
+
+	const colorFilters = [
+		{ label: 'White', code: 'W' },
+		{ label: 'Blue', code: 'U' },
+		{ label: 'Black', code: 'B' },
+		{ label: 'Red', code: 'R' },
+		{ label: 'Green', code: 'G' },
+	];
 
   return (
     <div>
@@ -398,23 +391,27 @@ const handleClose = () => {
 					</div>
 				</div>
 				<div className="sorting">
-					<select onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
-						<option value={50}>50</option>
-						<option value={100}>100</option>
-						<option value={200}>200</option>
-					</select>
-					<button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
-					<button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= cards.length}>Next</button>
-
 					{Pagination}
-					<select onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
-						<option value="" disabled>Sort by..</option>
-						<option value="rarity">Sort by Rarity</option>
-						<option value="layout">Sort by Layout</option>
-						<option value="name">Sort by Name</option>
-						<option value="cmc">Sort by Mana Cost</option>
-						<option value="color_identity">Sort by Color</option>
+					<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
+						<option value="" disabled>Sort cards by..</option>
+						<option value="name">Name</option>
+						<option value="cmc">Mana Cost</option>
+						<option value="layout">Layout (split, flip, transform, ...)</option>
+						<option value="color_identity">Color (white, blue, black, red, green)</option>
+						<option value="rarity">Rarity (common, uncommon, rare, ...)</option>
 					</select>
+					<div>
+						{colorFilters.map(({ label, code }) => (
+							<label key={code}>
+								<input
+									type="checkbox"
+									checked={filteredColors.includes(code)}
+									onChange={() => handleColorFilterChange(code)}
+								/>
+								{label}
+							</label>
+						))}
+					</div>
 				</div>
 			</div>
 			<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
