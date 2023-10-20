@@ -9,6 +9,7 @@ function CardsDisplay() {
   const [cards, 							setCards] 							= useState([]);
 	const [totalCards, 					setTotalCards] 					= useState(0);
 	const [selectedSort, 				setSelectedSort] 				= useState("");
+	const [sortOrder, 					setSortOrder] 					= useState('');
 	const [selectedColors, 			setSelectedColors] 			= useState([]);
 	const [filteredCards, 			setFilteredCards] 			= useState([]);
 	const [filteredColors, 			setFilteredColors] 			= useState([]);
@@ -26,6 +27,7 @@ function CardsDisplay() {
 
 	const resetStates = () => {
 		setCards([]);
+		setSortOrder('');
 		setSelectedSort("");
 		setTotalCards(0);
 		setErrorMessageC("");
@@ -171,16 +173,25 @@ const compareByRarity = (val1, val2) => {
 };
 
 const sortCards = (criteria) => {
-	let comparator;
+	let originalComparator = getComparator(criteria);
+
 	if (criteria === 'rarity') {
-			comparator = (a, b) => compareByRarity(a[criteria], b[criteria]);
-	} else {
-			comparator = getComparator(criteria);
+			originalComparator = (a, b) => compareByRarity(a[criteria], b[criteria]);
+	}
+
+	let comparator = originalComparator;
+
+	if (sortOrder === 'desc') {
+		comparator = (a, b) => -originalComparator(a, b);
 	}
 
 	const sortedCards = [...cards].sort(comparator);
 	setCards(sortedCards);
 };
+
+useEffect(() => {
+  sortCards(selectedSort);
+}, [sortOrder]);
 
 useEffect(() => {
 	const newFilteredCards = cards.filter(card => {
@@ -432,6 +443,15 @@ const handleClose = () => {
 						))}
 					</div>
 				</div>
+				<select 
+					value={sortOrder} 
+					onChange={(e) => setSortOrder(e.target.value)}
+					disabled={!selectedSort}
+				>
+					<option value="" disabled>Select sorting order..</option>
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
+				</select>
 				<div className="sorting">
 					{Pagination}
 					<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
@@ -495,9 +515,9 @@ const handleClose = () => {
 						>
 							{renderImage(card)}
 						</div>
-						{/* Rarity: {card.rarity}
+						Rarity: {card.rarity}
 						<br />
-						Layout: {card.layout} */}
+						Layout: {card.layout}
 					</div>
 				))}
 			</div>
