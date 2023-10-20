@@ -52,7 +52,7 @@ body {
 }
 
 button, input, select {
-  padding: 2px 8px;
+  padding: 2px 8px 3px 8px;
   margin: 4px;
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
@@ -120,10 +120,10 @@ input[type="checkbox"] {
   overflow: hidden;
 }
 
-.scrollToTop {
+
+.scrollButton {
   position: fixed;
-  top: 0;
-  right: 0;
+  right: 10px;
   z-index: 999;
   width: 40px;
   border-radius: 50%;
@@ -131,17 +131,12 @@ input[type="checkbox"] {
   line-height: 0;
   padding-bottom: 8px;
 }
+.scrollToTop {
+  top: 10px;
+}
 
 .scrollToBottom {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  z-index: 999;
-  width: 40px;
-  border-radius: 50%;
-  font-size: 30px;
-  line-height: 0;
-  padding-bottom: 8px;
+  bottom: 10px;
 }
 
 
@@ -253,6 +248,7 @@ form {
   position: absolute;
   top: 0;
   right: 0;
+  width: 40px;
 }
 .printsContainer {
   display: grid;

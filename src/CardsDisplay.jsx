@@ -237,18 +237,14 @@ const totalPages = Math.ceil(totalCards / cardsPerPage);
 const handleCardEvent = (event, cardId) => {
 	if (isModalOpen) return;
 
-  const eventType = event.type;
-
-  if (eventType === "click") {
+  if (event.type === "click") {
     setActiveCards((prevActiveCards) => {
-      if (prevActiveCards.includes(cardId)) {
-        return prevActiveCards.filter((id) => id !== cardId);
-      } else {
-        return [...prevActiveCards, cardId];
-      }
+      const newActiveCards = new Set(prevActiveCards);
+      newActiveCards.has(cardId) ? newActiveCards.delete(cardId) : newActiveCards.add(cardId);
+      return Array.from(newActiveCards);
     });
-  } else if (eventType === "mouseover" || eventType === "mouseout") {
-    setHoveredCard(eventType === "mouseover" ? cardId : "");
+  } else if (event.type === "mouseover" || event.type === "mouseout") {
+    setHoveredCard(event.type === "mouseover" ? cardId : "");
   }
 };
 
@@ -485,7 +481,7 @@ const handleClose = () => {
 			<div className="cardContainer">
 				{isModalOpen && (
 					<div className="modal">
-						<button onClick={handleClose}>Close</button>
+						<button onClick={handleClose}>X</button>
 						{clickedCardName} - Total Prints found: {totalPrints}
 						{isLoading && <span>Loading...</span>}
 						{errorMessageP && <div>{errorMessageP}</div>}
@@ -515,17 +511,17 @@ const handleClose = () => {
 						>
 							{renderImage(card)}
 						</div>
-						Rarity: {card.rarity}
+						{/* Rarity: {card.rarity}
 						<br />
-						Layout: {card.layout}
+						Layout: {card.layout} */}
 					</div>
 				))}
 			</div>
 			{Pagination}
       {displayedCards.length > 20 && (
         <>
-          {showScrollToTop && <button className="scrollToTop" onClick={scrollToTop}>↑</button>}
-          {showScrollToBottom && <button className="scrollToBottom" onClick={scrollToBottom}>↓</button>}
+          {showScrollToTop && <button className="scrollButton scrollToTop" onClick={scrollToTop}>↑</button>}
+          {showScrollToBottom && <button className="scrollButton scrollToBottom" onClick={scrollToBottom}>↓</button>}
         </>
       )}
     </div>
