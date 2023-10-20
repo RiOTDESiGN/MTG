@@ -2,24 +2,27 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 function CardsDisplay() {
-  const [query, 					setQuery] 					= useState("");
-	const [errorMessageC, 	setErrorMessageC]		= useState('');
-	const [errorMessageP,		setErrorMessageP]		= useState('');
-  const [cards, 					setCards] 					= useState([]);
-	const [totalCards, 			setTotalCards] 			= useState(0);
-	const [selectedSort, 		setSelectedSort] 		= useState("");
-	const [selectedColors, 	setSelectedColors] 	= useState([]);
-	const [filteredColors, 	setFilteredColors] 	= useState([]);
-	const [filteredCards, 	setFilteredCards] 	= useState([]);
-	const [hoveredCard, 		setHoveredCard] 		= useState("");
-	const [activeCards, 		setActiveCards] 		= useState([]);
-	const [clickedCardName, setClickedCardName] = useState('');
-	const [isModalOpen, 		setModalOpen] 			= useState(false);
-	const [prints, 					setPrints] 					= useState([]);
-	const [totalPrints, 		setTotalPrints] 		= useState(0);
-	const [cardsPerPage, 		setCardsPerPage] 		= useState(50);
-	const [currentPage,			setCurrentPage]			= useState(1);
-	const [isLoading, 			setIsLoading] 			= useState(false);
+	const queryRef = useRef(null);
+
+	const [errorMessageC, 			setErrorMessageC]				= useState('');
+	const [errorMessageP,				setErrorMessageP]				= useState('');
+  const [cards, 							setCards] 							= useState([]);
+	const [totalCards, 					setTotalCards] 					= useState(0);
+	const [selectedSort, 				setSelectedSort] 				= useState("");
+	const [selectedColors, 			setSelectedColors] 			= useState([]);
+	const [filteredCards, 			setFilteredCards] 			= useState([]);
+	const [filteredColors, 			setFilteredColors] 			= useState([]);
+	const [hoveredCard, 				setHoveredCard] 				= useState("");
+	const [activeCards, 				setActiveCards] 				= useState([]);
+	const [clickedCardName, 		setClickedCardName] 		= useState('');
+	const [isModalOpen, 				setModalOpen] 					= useState(false);
+	const [prints, 							setPrints] 							= useState([]);
+	const [totalPrints, 				setTotalPrints] 				= useState(0);
+	const [cardsPerPage, 				setCardsPerPage] 				= useState(50);
+	const [currentPage,					setCurrentPage]					= useState(1);
+	const [isLoading, 					setIsLoading] 					= useState(false);
+	const [showScrollToTop, 		setShowScrollToTop] 		= useState(false);
+  const [showScrollToBottom, 	setShowScrollToBottom] 	= useState(true);
 
 	const resetStates = () => {
 		setCards([]);
@@ -35,22 +38,19 @@ function CardsDisplay() {
 		setCurrentPage(1);
 	};
 	
-// console.log(currentPage);
+console.log(currentPage);
 
-// console.log(cardsPerPage);
+console.log(cardsPerPage);
 
 
-// Create Cache Key
 const createCacheKey = (query, selectedColors, page) => `query=${query}_colors=${selectedColors}_page=${page}`;
 
-// Get Error Message
 const getErrorMessage = (error) => {
   return error.response?.status === 404
     ? "No cards found. Your search didn’t match any cards, please try again."
     : "Please type at least one letter in the searchbox, or select at least one color to search for.";
 };
 
-// Fetch Data
 const fetchData = async (apiUrl, cacheKey, cache) => {
   if (cache[cacheKey]) {
     console.log("Fetching from cache");
@@ -63,16 +63,16 @@ const fetchData = async (apiUrl, cacheKey, cache) => {
   return data;
 };
 
-// The main function
 const searchCards = async (initialApiUrl) => {
   setIsLoading(true);
   const cards = [];
+	const query = queryRef.current ? queryRef.current.value : '';
 
   try {
     let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
 
     if (selectedColors.length) {
-      apiUrl += `+c=${selectedColors.join("")}`;
+      apiUrl += `+c="${selectedColors.join("")}"`;
     }
 
     do {
@@ -87,8 +87,8 @@ const searchCards = async (initialApiUrl) => {
       await new Promise(resolve => setTimeout(resolve, 50));
 
     } while(apiUrl);
-
-    setCards(cards);
+		
+		setCards(cards);
     setCurrentPage(1);
 
   } catch (error) {
@@ -125,11 +125,12 @@ const searchCards = async (initialApiUrl) => {
 	};
 	
 	const colorOrder = {
-		W: 0,
-		U: 1,
-		B: 2,
-		R: 3,
-		G: 4,
+		C: 0,
+		W: 1,
+		U: 2,
+		B: 3,
+		R: 4,
+		G: 5,
 	};
 	
 	const getComparator = (criteria) => {
@@ -182,16 +183,27 @@ const sortCards = (criteria) => {
 };
 
 useEffect(() => {
-	const newFilteredCards = cards.filter(card => !card.color_identity.some(color => filteredColors.includes(color)));
-	
+	const newFilteredCards = cards.filter(card => {
+		if (card.color_identity.length === 0) {
+			return !filteredColors.includes('');
+		}
+		return !card.color_identity.some(color => filteredColors.includes(color));
+	});
+
 	setTotalCards(newFilteredCards.length);
 	setFilteredCards(newFilteredCards);
 
-	if (currentPage * cardsPerPage >= newFilteredCards.length) {
-		setCurrentPage(Math.ceil(newFilteredCards.length / cardsPerPage));
+	if (newFilteredCards.length > 0) {
+		if (currentPage * cardsPerPage >= newFilteredCards.length) {
+			setCurrentPage(Math.ceil(newFilteredCards.length / cardsPerPage));
+		}
+	} else {
+		setCurrentPage(1);
 	}
 
 }, [filteredColors, cards, cardsPerPage, currentPage]);
+
+
 
 const displayedCards = filteredCards.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage);
 const totalPages = Math.ceil(totalCards / cardsPerPage);
@@ -320,23 +332,25 @@ const handleClose = () => {
 		return null;
 	};
 
-	const colorMapping = {
-  'W': '#f9faf5',
-  'U': '#0f68ab',
-	'B': '#160b00',
-  'R': '#d31e2a',
-  'G': '#00743f'
-};
-	const colorOptions = ['W', 'U', 'B', 'R', 'G'];
+	const colorFilters = [
+		{ label: 'None', code: '', color: 'transparent' },
+		{ label: 'White', code: 'W', color: '#f9faf5' },
+		{ label: 'Blue', code: 'U', color: '#0f68ab' },
+		{ label: 'Black', code: 'B', color: '#160b00' },
+		{ label: 'Red', code: 'R', color: '#d31e2a' },
+		{ label: 'Green', code: 'G', color: '#00743f' },
+	];
 
-	const handleColorChange = (e) => {
-		const value = e.target.value;
-		
-		setSelectedColors(prevState =>
-			prevState.includes(value)
-				? prevState.filter(color => color !== value)
-				: [...prevState, value]
-		);
+	const handleColorChange = (colorCode) => {
+		setSelectedColors(prevState => {
+			if (colorCode === '') {
+				return prevState.includes('') ? [] : [''];
+			}
+			const otherColors = prevState.filter(color => color !== '');
+			return otherColors.includes(colorCode)
+				? otherColors.filter(color => color !== colorCode)
+				: [...otherColors, colorCode];
+		});
 	};
 
 	const handleColorFilterChange = (color) => {
@@ -349,13 +363,45 @@ const handleClose = () => {
 		});
 	};
 
-	const colorFilters = [
-		{ label: 'White', code: 'W' },
-		{ label: 'Blue', code: 'U' },
-		{ label: 'Black', code: 'B' },
-		{ label: 'Red', code: 'R' },
-		{ label: 'Green', code: 'G' },
-	];
+	const ColorOption = ({ colorCode, color, isSelected, onChange }) => (
+		<div 
+			className="checkbox-container" 
+			style={{ backgroundColor: color }}
+		>
+			<input
+				type="checkbox"
+				checked={isSelected}
+				onChange={() => onChange(colorCode)}
+			/>
+		</div>
+	);	
+
+  const bottomThreshold = 600;
+
+	const checkScrollPosition = () => {
+		const scrolledFromTop = window.scrollY;
+		const scrolledToTop = scrolledFromTop <= bottomThreshold;
+		const scrolledToBottom = window.innerHeight + scrolledFromTop >= document.body.scrollHeight;
+	
+		setShowScrollToTop(!scrolledToTop);
+		setShowScrollToBottom(!scrolledToBottom && scrolledFromTop > bottomThreshold);
+	};	
+
+  useEffect(() => {
+    window.addEventListener('scroll', checkScrollPosition);
+
+    return () => {
+      window.removeEventListener('scroll', checkScrollPosition);
+    };
+  }, []);
+
+  const scrollToBottom = () => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div>
@@ -367,26 +413,22 @@ const handleClose = () => {
 							searchCards();}}>
 						<input
 							type="text"
-							value={query}
+							ref={queryRef}
 							placeholder="Search by name.."
-							onChange={e => setQuery(e.target.value)}
 						/>
 						<button>Search</button>
 					</form>
 					<div className="color-options">
-						{colorOptions.map((colorCode, index) => (
-							<label key={index}>
-								<div 
-									className="checkbox-container" 
-									style={{ backgroundColor: colorMapping[colorCode] }}
-								>
-									<input
-										type="checkbox"
-										value={colorCode}
-										onChange={handleColorChange}
-									/>
-								</div>
-							</label>
+						{colorFilters.map(({ label, code, color }) => (
+							<div key={code} className={label === 'None' ? 'new-line' : ''}>
+								{label === 'None' && "Search for colorless or colors :"}
+								<ColorOption 
+									colorCode={code}
+									color={color}
+									isSelected={selectedColors.includes(code)}
+									onChange={handleColorChange}
+								/>
+							</div>
 						))}
 					</div>
 				</div>
@@ -400,16 +442,19 @@ const handleClose = () => {
 						<option value="color_identity">Color (white, blue, black, red, green)</option>
 						<option value="rarity">Rarity (common, uncommon, rare, ...)</option>
 					</select>
-					<div>
-						{colorFilters.map(({ label, code }) => (
-							<label key={code}>
-								<input
-									type="checkbox"
-									checked={filteredColors.includes(code)}
-									onChange={() => handleColorFilterChange(code)}
+					<div className="spacer"></div>
+					<div className="color-options">
+						{colorFilters.map(({ label, code, color }) => (
+							<div key={code} className={label === 'None' ? 'new-line' : ''}>
+								{label === 'None' && "Remove cards by Color Identity :"}
+								<ColorOption 
+									key={code}
+									colorCode={code}
+									color={color}
+									isSelected={filteredColors.includes(code)}
+									onChange={handleColorFilterChange}
 								/>
-								{label}
-							</label>
+							</div>
 						))}
 					</div>
 				</div>
@@ -450,13 +495,19 @@ const handleClose = () => {
 						>
 							{renderImage(card)}
 						</div>
-						Rarity: {card.rarity}
+						{/* Rarity: {card.rarity}
 						<br />
-						Layout: {card.layout}
+						Layout: {card.layout} */}
 					</div>
 				))}
 			</div>
 			{Pagination}
+      {displayedCards.length > 20 && (
+        <>
+          {showScrollToTop && <button className="scrollToTop" onClick={scrollToTop}>↑</button>}
+          {showScrollToBottom && <button className="scrollToBottom" onClick={scrollToBottom}>↓</button>}
+        </>
+      )}
     </div>
   );
 }
