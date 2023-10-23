@@ -3,6 +3,7 @@ import axios from "axios";
 
 function CardsDisplay() {
 	const queryRef = useRef(null);
+	const selectedColorsRef = useRef([]);
 
 	const [errorMessageC, 			setErrorMessageC]				= useState('');
 	const [errorMessageP,				setErrorMessageP]				= useState('');
@@ -10,7 +11,6 @@ function CardsDisplay() {
 	const [totalCards, 					setTotalCards] 					= useState(0);
 	const [selectedSort, 				setSelectedSort] 				= useState("");
 	const [sortOrder, 					setSortOrder] 					= useState('');
-	const [selectedColors, 			setSelectedColors] 			= useState([]);
 	const [filteredCards, 			setFilteredCards] 			= useState([]);
 	const [filteredColors, 			setFilteredColors] 			= useState([]);
 	const [hoveredCard, 				setHoveredCard] 				= useState("");
@@ -73,14 +73,14 @@ const searchCards = async (initialApiUrl) => {
   try {
     let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
 
-    if (selectedColors.length) {
-      apiUrl += `+c="${selectedColors.join("")}"`;
+    if (selectedColorsRef.current.length) {
+      apiUrl += `+c="${selectedColorsRef.current.join("")}"`;
     }
 
     do {
       const url = new URL(apiUrl);
       const page = url.searchParams.get("page") || '1';
-      const cacheKey = createCacheKey(query, selectedColors, page);
+      const cacheKey = createCacheKey(query, selectedColorsRef.current, page);
       const { data, has_more, next_page } = await fetchData(apiUrl, cacheKey, searchCardsCache);
 
       cards.push(...data);
@@ -98,6 +98,7 @@ const searchCards = async (initialApiUrl) => {
     setErrorMessageC(errorMessageC);
   } finally {
     setIsLoading(false);
+		resetCheckboxes();
     console.log("Current cache state:", searchCardsCache);
   }
 };
@@ -348,17 +349,24 @@ const handleClose = () => {
 		{ label: 'Green', code: 'G', color: '#00743f' },
 	];
 
-	const handleColorChange = (colorCode) => {
-		setSelectedColors(prevState => {
-			if (colorCode === '') {
-				return prevState.includes('') ? [] : [''];
+	const handleColorSearch = (e, colorCode) => {
+		const selectedColors = selectedColorsRef.current;
+		const checkbox = e.target;
+		
+		if (colorCode === '') {
+			selectedColorsRef.current = selectedColors.includes('') ? [] : [''];
+			checkbox.checked = selectedColorsRef.current.includes('');
+		} else {
+			const otherColors = selectedColors.filter(color => color !== '');
+			if (otherColors.includes(colorCode)) {
+				selectedColorsRef.current = otherColors.filter(color => color !== colorCode);
+				checkbox.checked = false;
+			} else {
+				selectedColorsRef.current = [...otherColors, colorCode];
+				checkbox.checked = true;
 			}
-			const otherColors = prevState.filter(color => color !== '');
-			return otherColors.includes(colorCode)
-				? otherColors.filter(color => color !== colorCode)
-				: [...otherColors, colorCode];
-		});
-	};
+		}
+	};	
 
 	const handleColorFilterChange = (color) => {
 		setFilteredColors(prevFilteredColors => {
@@ -381,7 +389,21 @@ const handleClose = () => {
 				onChange={() => onChange(colorCode)}
 			/>
 		</div>
-	);	
+	);
+
+	const ColorSearch = ({ colorCode, color }) => (
+		<div 
+			className="checkbox-container" 
+			style={{ backgroundColor: color }}
+		>
+			<input
+				type="checkbox"
+				onChange={(e) => handleColorSearch(e, colorCode)}
+			/>
+		</div>
+	);
+
+	const resetCheckboxes = () => {selectedColorsRef.current = [];};	
 
   const bottomThreshold = 600;
 
@@ -429,11 +451,11 @@ const handleClose = () => {
 						{colorFilters.map(({ label, code, color }) => (
 							<div key={code} className={label === 'None' ? 'new-line' : ''}>
 								{label === 'None' && "Search for colorless or colors :"}
-								<ColorOption 
+								<ColorSearch 
 									colorCode={code}
 									color={color}
-									isSelected={selectedColors.includes(code)}
-									onChange={handleColorChange}
+									isSelected={selectedColorsRef.current.includes(code)}
+									onChange={handleColorSearch}
 								/>
 							</div>
 						))}
