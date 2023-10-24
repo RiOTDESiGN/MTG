@@ -139,7 +139,6 @@ input[type="checkbox"] {
   overflow: hidden;
 }
 
-
 .scrollButton {
   position: fixed;
   right: 10px;
@@ -158,13 +157,22 @@ input[type="checkbox"] {
   bottom: 10px;
 }
 
-.searchfield {
+.flex {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
   justify-content: space-between;
   max-width: 326px;
+}
+
+.flex-h {
+  flex-wrap: nowrap;
+  flex-direction: row;
+}
+
+.nocards {
+  text-align: center;
 }
 
 form {
@@ -189,22 +197,7 @@ form {
 }
 
 .spacer {
-  height: 14px;
-}
-
-.sort-order {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sorting {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 326px;
+  /* height: 14px; */
 }
 
 .color-options {

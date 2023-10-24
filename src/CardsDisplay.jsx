@@ -211,34 +211,25 @@ useEffect(() => {
 			setCurrentPage(Math.ceil(newFilteredCards.length / cardsPerPage));
 		}
 	} else {
-		setCurrentPage(0);
+		setCurrentPage(1);
 	}
 
 }, [filteredColors, cards, cardsPerPage, currentPage]);
 
-
-
 const displayedCards = filteredCards.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage);
 const totalPages = Math.ceil(totalCards / cardsPerPage);
 
-	const Pagination = 
-		<div className="pagination">
-			<select className="cards-per-page" onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
-				<option value={50}>50</option>
-				<option value={100}>100</option>
-				<option value={250}>250</option>
-				<option value={500}>500</option>
-				<option value={1000}>1000</option>
-			</select>
-			<button className="button-prev" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0 || currentPage === 1}>
-				<div className="arrow left"></div>
-			</button>
-			<div className="currentPage">{currentPage} / {totalPages}</div>
-			<button className="button-next" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= totalCards}>
-				<div className="arrow right"></div>
-			</button>
-		</div>;
-
+const Pagination = totalPages < 2 ? null : (
+	<div className="pagination">
+		<button className="button-prev" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0 || currentPage === 1}>
+			<div className="arrow left"></div>
+		</button>
+		<div className="currentPage">{currentPage} / {totalPages}</div>
+		<button className="button-next" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= totalCards}>
+			<div className="arrow right"></div>
+		</button>
+	</div>
+);
 
 const handleCardEvent = (event, cardId) => {
 	if (isModalOpen) return;
@@ -386,16 +377,14 @@ const handleClose = () => {
 	);
 
 	const handleColorFilterChange = (color) => {
-		setFilteredColors(prevFilteredColors => {
-			if (prevFilteredColors.includes(color)) {
-				return prevFilteredColors.filter(c => c !== color);
-			} else {
-				return [...prevFilteredColors, color];
-			}
-		});
-	};
+		setFilteredColors(prevFilteredColors => 
+			prevFilteredColors.includes(color) 
+				? prevFilteredColors.filter(c => c !== color)
+				: [...prevFilteredColors, color]
+		);
+	};	
 
-	const ColorOption = ({ colorCode, color, isSelected, onChange }) => (
+	const ColorOption = ({ colorCode, color, isSelected, onChange, disabled }) => (
 		<div 
 			className="checkbox-container" 
 			style={{ backgroundColor: color }}
@@ -404,6 +393,7 @@ const handleClose = () => {
 				type="checkbox"
 				checked={isSelected}
 				onChange={() => onChange(colorCode)}
+				disabled={disabled}
 			/>
 		</div>
 	);
@@ -440,7 +430,7 @@ const handleClose = () => {
   return (
     <div>
 			<div className="controls">
-				<div className="searchfield">
+				<div className="flex">
 					<form onSubmit={(e) => {
 						e.preventDefault();
 							resetStates();
@@ -455,7 +445,7 @@ const handleClose = () => {
 					<div className="color-options">
 						{colorFilters.map(({ label, code, color }) => (
 							<div key={code} className={label === 'None' ? 'new-line' : ''}>
-								{label === 'None' && "Search for colorless or colors :"}
+								{label === 'None' && "Find cards by Color Identity :"}
 								<ColorSearch 
 									colorCode={code}
 									color={color}
@@ -466,20 +456,29 @@ const handleClose = () => {
 						))}
 					</div>
 				</div>
-				<div className="sort-order">
-					<select
-						value={sortOrder}
-						onChange={(e) => setSortOrder(e.target.value)}
-						disabled={!selectedSort}
-					>
-						<option value="" disabled>Select sorting order..</option>
-						<option value="asc">Ascending</option>
-						<option value="desc">Descending</option>
-					</select>
+				<div className="flex">
+					<div className="flex flex-h">
+						<select className="cards-per-page" onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
+							<option value={50}>50</option>
+							<option value={100}>100</option>
+							<option value={250}>250</option>
+							<option value={500}>500</option>
+							<option value={1000}>1000</option>
+						</select>
+						<select
+							value={sortOrder}
+							onChange={(e) => setSortOrder(e.target.value)}
+							disabled={!selectedSort}
+						>
+							<option value="" disabled>Select sorting order..</option>
+							<option value="asc">Ascending</option>
+							<option value="desc">Descending</option>
+						</select>
+					</div>
 					<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 					{Pagination}
 				</div>
-				<div className="sorting">
+				<div className="flex">
 					<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
 						<option value="" disabled>Sort cards by..</option>
 						<option value="name">Name</option>
@@ -491,7 +490,7 @@ const handleClose = () => {
 					<div className="spacer"></div>
 					<div className="color-options">
 						{colorFilters.map(({ label, code, color }) => (
-							<div key={code} className={label === 'None' ? 'new-line' : ''}>
+							<div key={code} className={`${label === 'None' ? 'new-line' : ''}`}>
 								{label === 'None' && "Remove cards by Color Identity :"}
 								<ColorOption 
 									key={code}
@@ -499,6 +498,7 @@ const handleClose = () => {
 									color={color}
 									isSelected={filteredColors.includes(code)}
 									onChange={handleColorFilterChange}
+									disabled={displayedCards.length === 0 && filteredColors.length === 0}
 								/>
 							</div>
 						))}
@@ -507,6 +507,7 @@ const handleClose = () => {
 			</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
+			{displayedCards.length === 0 && <div className="nocards">Search for cards or remove one of your color-filters.</div>}
 			<div className="cardContainer">
 				{isModalOpen && (
 					<div className="modal">
