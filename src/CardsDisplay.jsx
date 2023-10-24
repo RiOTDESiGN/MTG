@@ -31,6 +31,7 @@ function CardsDisplay() {
 		setSelectedSort("");
 		setTotalCards(0);
 		setErrorMessageC("");
+		setFilteredColors([]);
 	}
 
 	const searchCardsCache = useRef({});
@@ -210,7 +211,7 @@ useEffect(() => {
 			setCurrentPage(Math.ceil(newFilteredCards.length / cardsPerPage));
 		}
 	} else {
-		setCurrentPage(1);
+		setCurrentPage(0);
 	}
 
 }, [filteredColors, cards, cardsPerPage, currentPage]);
@@ -229,9 +230,13 @@ const totalPages = Math.ceil(totalCards / cardsPerPage);
 				<option value={500}>500</option>
 				<option value={1000}>1000</option>
 			</select>
-			<button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0 || currentPage === 1}>Previous</button>
-			<div className="currentPage">{currentPage}</div>
-			<button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= totalCards}>Next</button>
+			<button className="button-prev" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 0 || currentPage === 1}>
+				<div className="arrow left"></div>
+			</button>
+			<div className="currentPage">{currentPage} / {totalPages}</div>
+			<button className="button-next" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage * cardsPerPage >= totalCards}>
+				<div className="arrow right"></div>
+			</button>
 		</div>;
 
 
@@ -368,6 +373,18 @@ const handleClose = () => {
 		}
 	};	
 
+	const ColorSearch = ({ colorCode, color }) => (
+		<div 
+			className="checkbox-container" 
+			style={{ backgroundColor: color }}
+		>
+			<input
+				type="checkbox"
+				onChange={(e) => handleColorSearch(e, colorCode)}
+			/>
+		</div>
+	);
+
 	const handleColorFilterChange = (color) => {
 		setFilteredColors(prevFilteredColors => {
 			if (prevFilteredColors.includes(color)) {
@@ -387,18 +404,6 @@ const handleClose = () => {
 				type="checkbox"
 				checked={isSelected}
 				onChange={() => onChange(colorCode)}
-			/>
-		</div>
-	);
-
-	const ColorSearch = ({ colorCode, color }) => (
-		<div 
-			className="checkbox-container" 
-			style={{ backgroundColor: color }}
-		>
-			<input
-				type="checkbox"
-				onChange={(e) => handleColorSearch(e, colorCode)}
 			/>
 		</div>
 	);
@@ -461,17 +466,20 @@ const handleClose = () => {
 						))}
 					</div>
 				</div>
-				<select 
-					value={sortOrder} 
-					onChange={(e) => setSortOrder(e.target.value)}
-					disabled={!selectedSort}
-				>
-					<option value="" disabled>Select sorting order..</option>
-					<option value="asc">Ascending</option>
-					<option value="desc">Descending</option>
-				</select>
-				<div className="sorting">
+				<div className="sort-order">
+					<select
+						value={sortOrder}
+						onChange={(e) => setSortOrder(e.target.value)}
+						disabled={!selectedSort}
+					>
+						<option value="" disabled>Select sorting order..</option>
+						<option value="asc">Ascending</option>
+						<option value="desc">Descending</option>
+					</select>
+					<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 					{Pagination}
+				</div>
+				<div className="sorting">
 					<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
 						<option value="" disabled>Sort cards by..</option>
 						<option value="name">Name</option>
@@ -497,7 +505,6 @@ const handleClose = () => {
 					</div>
 				</div>
 			</div>
-			<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			<div className="cardContainer">

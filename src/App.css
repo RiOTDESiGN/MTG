@@ -79,15 +79,34 @@ input, select {
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
   height: 40px;
-  width: 52px;
+  width: 100px;
   color: var(--body_text_color);
   background-color: rgb(0, 0, 0);
 }
 .cards-per-page {
-  width: 80px;
+  width: 92px;
 }
 .select-sorting {
   width: 316px;
+}
+.button-prev,
+.button-next {width: 50px;}
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  margin-bottom: 1px;
+}
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  margin-right: 1px;
+}
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+  margin-left: 3px;
 }
 
 .controls {
@@ -139,7 +158,6 @@ input[type="checkbox"] {
   bottom: 10px;
 }
 
-
 .searchfield {
   display: flex;
   flex-direction: column;
@@ -172,6 +190,13 @@ form {
 
 .spacer {
   height: 14px;
+}
+
+.sort-order {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .sorting {
