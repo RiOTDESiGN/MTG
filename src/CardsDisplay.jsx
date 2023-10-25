@@ -76,7 +76,9 @@ const searchCards = async (initialApiUrl) => {
 
     if (selectedColorsRef.current.length) {
       apiUrl += `+c="${selectedColorsRef.current.join("")}"`;
-    }
+    } else {
+			document.getElementById("searchedColors").textContent = '';
+		}
 
     do {
       const url = new URL(apiUrl);
@@ -362,13 +364,10 @@ const handleClose = () => {
 				checkbox.checked = true;
 			}
 		}
-		// Map codes to their full names using colorFilters
 		const fullColorNames = selectedColorsRef.current.map(colorCode => {
 			const foundFilter = colorFilters.find(filter => filter.code === colorCode);
 			return foundFilter ? foundFilter.label : '';
 		}).join(", ");
-	
-		// Update the text content directly
 		document.getElementById("searchedColors").textContent = fullColorNames;
 	};	
 
@@ -448,7 +447,9 @@ const handleClose = () => {
 						<form onSubmit={(e) => {
 							e.preventDefault();
 								resetStates();
-								searchCards();}}>
+								searchCards();
+								queryRef.current.value = '';
+								}}>
 							<input
 								type="text"
 								ref={queryRef}
