@@ -9,7 +9,6 @@ function CardsDisplay() {
 	const [errorMessageP,				setErrorMessageP]				= useState('');
   const [cards, 							setCards] 							= useState([]);
 	const [totalCards, 					setTotalCards] 					= useState(0);
-	const [searchedColorsText, 	setSearchedColorsText] 	= useState("");
 	const [selectedSort, 				setSelectedSort] 				= useState("");
 	const [sortOrder, 					setSortOrder] 					= useState('');
 	const [filteredCards, 			setFilteredCards] 			= useState([]);
@@ -436,6 +435,11 @@ const handleClose = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+	const handleInput = () => {
+		const inputValue = queryRef.current.value;
+		document.getElementById("searchedName").innerText = inputValue;
+	}
+
   return (
     <div>
 			<div className="controls">
@@ -449,6 +453,7 @@ const handleClose = () => {
 								type="text"
 								ref={queryRef}
 								placeholder="Search by name.."
+								onInput={handleInput}
 							/>
 							<button>Search</button>
 						</form>
@@ -516,10 +521,10 @@ const handleClose = () => {
 				</div>
 				<div className="search-results-container">
 					<div className="search-results">
-						You searched for cards containing the word "{queryRef.current ? queryRef.current.value : ''}",
+						You searched for cards containing the word "<span id="searchedName"></span>",
 						and the colors "<span id="searchedColors"></span>",
-						and found {totalCards > 0 && `${totalCards} cards.
-						These are currently displayed over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
+						and found {totalCards > 0 && `${totalCards} ${totalCards === 1 ? 'card' : 'cards'}.
+						${totalCards === 1 ? 'This is' : 'These are'} currently displayed ${totalPages === 1 ? 'on' : 'over'} ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 				</div>
 			</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
