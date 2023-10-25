@@ -74,6 +74,10 @@ const searchCards = async (initialApiUrl) => {
   try {
     let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
 
+		if (query === '') {
+			document.getElementById("searchedName").innerText = '';
+		}
+
     if (selectedColorsRef.current.length) {
       apiUrl += `+c="${selectedColorsRef.current.join("")}"`;
     } else {
@@ -339,7 +343,7 @@ const handleClose = () => {
 	};
 
 	const colorFilters = [
-		{ label: 'none', code: '', color: 'transparent' },
+		{ label: 'achromatic', code: '', color: 'transparent' },
 		{ label: 'white', code: 'W', color: '#f9faf5' },
 		{ label: 'blue', code: 'U', color: '#0f68ab' },
 		{ label: 'black', code: 'B', color: '#160b00' },
@@ -460,8 +464,8 @@ const handleClose = () => {
 						</form>
 						<div className="color-options">
 							{colorFilters.map(({ label, code, color }) => (
-								<div key={code} className={label === 'none' ? 'new-line' : ''}>
-									{label === 'none' && "Find cards by Color Identity :"}
+								<div key={code} className={label === 'achromatic' ? 'new-line' : ''}>
+									{label === 'achromatic' && "Find cards by Color Identity :"}
 									<ColorSearch
 										colorCode={code}
 										color={color}
@@ -505,8 +509,8 @@ const handleClose = () => {
 						<div className="spacer"></div>
 						<div className="color-options">
 							{colorFilters.map(({ label, code, color }) => (
-								<div key={code} className={`${label === 'none' ? 'new-line' : ''}`}>
-									{label === 'none' && "Remove cards by Color Identity :"}
+								<div key={code} className={`${label === 'achromatic' ? 'new-line' : ''}`}>
+									{label === 'achromatic' && "Remove cards by Color Identity :"}
 									<ColorOption
 										key={code}
 										colorCode={code}
@@ -522,9 +526,8 @@ const handleClose = () => {
 				</div>
 				<div className="search-results-container">
 					<div className="search-results">
-						You searched for cards containing the word "<span id="searchedName"></span>",
-						and the colors "<span id="searchedColors"></span>",
-						and found {totalCards > 0 && `${totalCards} ${totalCards === 1 ? 'card' : 'cards'}.
+						You're searching for <span id="searchedColors"></span> cards containing the word "<span id="searchedName"></span>"
+						{totalCards > 0 && `, and found ${totalCards} ${totalCards === 1 ? 'card' : 'cards'}.
 						${totalCards === 1 ? 'This is' : 'These are'} currently displayed ${totalPages === 1 ? 'on' : 'over'} ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 				</div>
 			</div>
