@@ -9,6 +9,7 @@ function CardsDisplay() {
 	const [errorMessageP,				setErrorMessageP]				= useState('');
   const [cards, 							setCards] 							= useState([]);
 	const [totalCards, 					setTotalCards] 					= useState(0);
+	const [searchedColorsText, 	setSearchedColorsText] 	= useState("");
 	const [selectedSort, 				setSelectedSort] 				= useState("");
 	const [sortOrder, 					setSortOrder] 					= useState('');
 	const [filteredCards, 			setFilteredCards] 			= useState([]);
@@ -337,12 +338,12 @@ const handleClose = () => {
 	};
 
 	const colorFilters = [
-		{ label: 'None', code: '', color: 'transparent' },
-		{ label: 'White', code: 'W', color: '#f9faf5' },
-		{ label: 'Blue', code: 'U', color: '#0f68ab' },
-		{ label: 'Black', code: 'B', color: '#160b00' },
-		{ label: 'Red', code: 'R', color: '#d31e2a' },
-		{ label: 'Green', code: 'G', color: '#00743f' },
+		{ label: 'none', code: '', color: 'transparent' },
+		{ label: 'white', code: 'W', color: '#f9faf5' },
+		{ label: 'blue', code: 'U', color: '#0f68ab' },
+		{ label: 'black', code: 'B', color: '#160b00' },
+		{ label: 'red', code: 'R', color: '#d31e2a' },
+		{ label: 'green', code: 'G', color: '#00743f' },
 	];
 
 	const handleColorSearch = (e, colorCode) => {
@@ -362,6 +363,14 @@ const handleClose = () => {
 				checkbox.checked = true;
 			}
 		}
+		// Map codes to their full names using colorFilters
+		const fullColorNames = selectedColorsRef.current.map(colorCode => {
+			const foundFilter = colorFilters.find(filter => filter.code === colorCode);
+			return foundFilter ? foundFilter.label : '';
+		}).join(", ");
+	
+		// Update the text content directly
+		document.getElementById("searchedColors").textContent = fullColorNames;
 	};	
 
 	const ColorSearch = ({ colorCode, color }) => (
@@ -430,79 +439,87 @@ const handleClose = () => {
   return (
     <div>
 			<div className="controls">
-				<div className="flex">
-					<form onSubmit={(e) => {
-						e.preventDefault();
-							resetStates();
-							searchCards();}}>
-						<input
-							type="text"
-							ref={queryRef}
-							placeholder="Search by name.."
-						/>
-						<button>Search</button>
-					</form>
-					<div className="color-options">
-						{colorFilters.map(({ label, code, color }) => (
-							<div key={code} className={label === 'None' ? 'new-line' : ''}>
-								{label === 'None' && "Find cards by Color Identity :"}
-								<ColorSearch 
-									colorCode={code}
-									color={color}
-									isSelected={selectedColorsRef.current.includes(code)}
-									onChange={handleColorSearch}
-								/>
-							</div>
-						))}
+				<div className="control-buttons">
+					<div className="flex">
+						<form onSubmit={(e) => {
+							e.preventDefault();
+								resetStates();
+								searchCards();}}>
+							<input
+								type="text"
+								ref={queryRef}
+								placeholder="Search by name.."
+							/>
+							<button>Search</button>
+						</form>
+						<div className="color-options">
+							{colorFilters.map(({ label, code, color }) => (
+								<div key={code} className={label === 'none' ? 'new-line' : ''}>
+									{label === 'none' && "Find cards by Color Identity :"}
+									<ColorSearch
+										colorCode={code}
+										color={color}
+										isSelected={selectedColorsRef.current.includes(code)}
+										onChange={handleColorSearch}
+									/>
+								</div>
+							))}
+						</div>
+					</div>
+					<div className="flex">
+						<div className="flex flex-h">
+							<select className="cards-per-page" onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
+								<option value={50}>50</option>
+								<option value={100}>100</option>
+								<option value={250}>250</option>
+								<option value={500}>500</option>
+								<option value={1000}>1000</option>
+							</select>
+							<select
+								value={sortOrder}
+								onChange={(e) => setSortOrder(e.target.value)}
+								disabled={!selectedSort}
+							>
+								<option value="" disabled>Select sorting order..</option>
+								<option value="asc">Ascending</option>
+								<option value="desc">Descending</option>
+							</select>
+						</div>
+						{Pagination}
+					</div>
+					<div className="flex">
+						<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
+							<option value="" disabled>Sort cards by..</option>
+							<option value="name">Name</option>
+							<option value="cmc">Mana Cost</option>
+							<option value="layout">Layout (split, flip, transform, ...)</option>
+							<option value="color_identity">Color (white, blue, black, red, green)</option>
+							<option value="rarity">Rarity (common, uncommon, rare, ...)</option>
+						</select>
+						<div className="spacer"></div>
+						<div className="color-options">
+							{colorFilters.map(({ label, code, color }) => (
+								<div key={code} className={`${label === 'none' ? 'new-line' : ''}`}>
+									{label === 'none' && "Remove cards by Color Identity :"}
+									<ColorOption
+										key={code}
+										colorCode={code}
+										color={color}
+										isSelected={filteredColors.includes(code)}
+										onChange={handleColorFilterChange}
+										disabled={displayedCards.length === 0 && filteredColors.length === 0}
+									/>
+								</div>
+							))}
+						</div>
 					</div>
 				</div>
-				<div className="flex">
-					<div className="flex flex-h">
-						<select className="cards-per-page" onChange={(e) => handleCardsPerPageChange(parseInt(e.target.value, 10))} value={cardsPerPage}>
-							<option value={50}>50</option>
-							<option value={100}>100</option>
-							<option value={250}>250</option>
-							<option value={500}>500</option>
-							<option value={1000}>1000</option>
-						</select>
-						<select
-							value={sortOrder}
-							onChange={(e) => setSortOrder(e.target.value)}
-							disabled={!selectedSort}
-						>
-							<option value="" disabled>Select sorting order..</option>
-							<option value="asc">Ascending</option>
-							<option value="desc">Descending</option>
-						</select>
-					</div>
-					<div className="search-results">{totalCards > 0 && `${totalCards} cards over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
-					{Pagination}
-				</div>
-				<div className="flex">
-					<select className="select-sorting" onChange={(e) => { sortCards(e.target.value); setSelectedSort(e.target.value); }} value={selectedSort}>
-						<option value="" disabled>Sort cards by..</option>
-						<option value="name">Name</option>
-						<option value="cmc">Mana Cost</option>
-						<option value="layout">Layout (split, flip, transform, ...)</option>
-						<option value="color_identity">Color (white, blue, black, red, green)</option>
-						<option value="rarity">Rarity (common, uncommon, rare, ...)</option>
-					</select>
-					<div className="spacer"></div>
-					<div className="color-options">
-						{colorFilters.map(({ label, code, color }) => (
-							<div key={code} className={`${label === 'None' ? 'new-line' : ''}`}>
-								{label === 'None' && "Remove cards by Color Identity :"}
-								<ColorOption 
-									key={code}
-									colorCode={code}
-									color={color}
-									isSelected={filteredColors.includes(code)}
-									onChange={handleColorFilterChange}
-									disabled={displayedCards.length === 0 && filteredColors.length === 0}
-								/>
-							</div>
-						))}
-					</div>
+				<div className="search-results-container">
+					<div className="search-results">
+						You searched for cards containing the word "{queryRef.current ? queryRef.current.value : ''}",
+						and the colors "<span id="searchedColors"></span>",
+						and found {totalCards > 0 && `${totalCards} cards.
+						These are currently displayed over ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
 				</div>
 			</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
