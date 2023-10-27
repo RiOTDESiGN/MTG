@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import Card from './Card';
 
 function CardsDisplay() {
 	const queryRef = useRef(null);
@@ -13,8 +14,6 @@ function CardsDisplay() {
 	const [sortOrder, 					setSortOrder] 					= useState('');
 	const [filteredCards, 			setFilteredCards] 			= useState([]);
 	const [filteredColors, 			setFilteredColors] 			= useState([]);
-	const [hoveredCard, 				setHoveredCard] 				= useState("");
-	const [activeCards, 				setActiveCards] 				= useState([]);
 	const [clickedCardName, 		setClickedCardName] 		= useState('');
 	const [isModalOpen, 				setModalOpen] 					= useState(false);
 	const [prints, 							setPrints] 							= useState([]);
@@ -237,20 +236,6 @@ const Pagination = totalPages < 2 ? null : (
 	</div>
 );
 
-const handleCardEvent = (event, cardId) => {
-	if (isModalOpen) return;
-
-  if (event.type === "click") {
-    setActiveCards((prevActiveCards) => {
-      const newActiveCards = new Set(prevActiveCards);
-      newActiveCards.has(cardId) ? newActiveCards.delete(cardId) : newActiveCards.add(cardId);
-      return Array.from(newActiveCards);
-    });
-  } else if (event.type === "mouseover" || event.type === "mouseout") {
-    setHoveredCard(event.type === "mouseover" ? cardId : "");
-  }
-};
-
 const handleRightClick = (name) => {
   setClickedCardName(name);
   setErrorMessageP("");
@@ -265,82 +250,6 @@ const handleClose = () => {
 	setModalOpen(false);
 	document.body.classList.remove('no-scroll');
 };
-
-	const getCardClass = (card, index) => {
-		const classNames = ["displayCard"];
-		if (card.id === hoveredCard) {classNames.push("hovered");}
-		const pushIfCondition = (condition, className) => condition && classNames.push(className);
-		const layouts = ["transform", "reversible_card", "modal_dfc", "art_series", "double_faced_token"];
-					pushIfCondition	(layouts.some((layout) => card.layout.includes(layout)), index === 1 ? "flip-card-back" : "flip-card-front");		
-					pushIfCondition	(card.layout === "transform" && card.type_line.includes("Siege"), index === 0 ? "siege" : "");
-					if (card.layout === "split") {
-						if (card.keywords.includes("Aftermath")) {
-							pushIfCondition(true, "aftermath");
-						} else {
-							pushIfCondition(true, "split");
-						}
-					}				
-		return classNames.join(" ");
-	};
-
-	const componentLabels = {
-		token: '(Token)',
-		meld_part: '(Part)',
-		meld_result: '(Result)'
-	};
-
-	const order = ['meld_part', 'token', 'meld_result'];
-
-	const renderImage = (card) => {
-		if (card.image_uris && card.layout !== "meld" && card.layout !== "flip") {
-			return (
-				<div className={getCardClass(card)}>
-					<img src={card.image_uris.normal} alt={card.name} />
-				</div>
-			);
-		}
-		if (card.layout === "flip") {
-			return (
-				<div className="upsidedown-container">
-					<div className={`${activeCards.includes(card.id) ? 'upsidedown' : ''}`} onClick={() => handleCardEvent(card.id)}>
-						<div className={getCardClass(card)}>
-							<img src={card.image_uris.normal} alt={card.name} />
-						</div>
-					</div>
-				</div>
-			);
-		}
-		if (card.card_faces) {
-			return (
-				<div className="flip-card-container">
-					<div className={`flip-card ${activeCards.includes(card.id) ? 'flipped' : 'flipped-back'}`} onClick={() => handleCardEvent(card.id)}>
-						{card.card_faces.map((card_face, index) => (
-							<div key={index} className={`${getCardClass(card, index)}`}>
-								<img src={card_face.image_uris.normal} alt={card_face.name} />
-							</div>
-						))}
-					</div>
-				</div>
-			);
-		}
-		if (card.all_parts && card.layout === "meld") {
-			const sortedParts = [...card.all_parts].sort((a, b) => {
-				return order.indexOf(a.component) - order.indexOf(b.component);
-			});
-			return (
-				<div className={getCardClass(card)}>
-					<img src={card.image_uris.normal} alt={card.name} />
-					{sortedParts.map((part, index) => (
-						<div key={index} className="meldCardTitle">
-							<span>{part.name}</span>
-							{componentLabels[part.component] || ''}
-						</div>
-					))}
-				</div>
-			);
-		}
-		return null;
-	};
 
 	const colorFilters = [
 		{ label: 'achromatic', code: '', color: 'transparent' },
@@ -529,8 +438,8 @@ const handleClose = () => {
 						You're searching for <span id="searchedColors"></span> cards containing the word "<span id="searchedName"></span>"
 						{totalCards > 0 && `, and found ${totalCards} ${totalCards === 1 ? 'card' : 'cards'}.
 						${totalCards === 1 ? 'This is' : 'These are'} currently displayed ${totalPages === 1 ? 'on' : 'over'} ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
+					</div>
 				</div>
-			</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			{displayedCards.length === 0 && <div className="nocards">Search for cards or remove one of your color-filters.</div>}
@@ -542,34 +451,29 @@ const handleClose = () => {
 						{isLoading && <span>Loading...</span>}
 						{errorMessageP && <div>{errorMessageP}</div>}
 						<div className="printsContainer">
-							{prints.map(print => (
-								<div key={print.id}>
-									<img
-										className="unique-print"
-										src={print.card_faces ? print.card_faces[0].image_uris.normal : print.image_uris.normal}
-										alt={print.name}
-									/>
-								</div>
-							))}
+							{prints.map(print => {
+								const imageSrc = (print.layout === "flip" || print.layout === "split" || print.layout === "aftermath" ? print.image_uris.normal : (print.card_faces ? print.card_faces[0].image_uris.normal : print.image_uris.normal));
+								return (
+									<div key={print.id}>
+										<img
+											className="unique-print"
+											src={imageSrc}
+											alt={print.name}
+										/>
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				)}
 				{displayedCards.map(card => (
 					<div key={card.id} className="card">
-						<div className="imgContainer"
-							onMouseOver={(e) => handleCardEvent(e, card.id)}
-							onMouseOut={(e) => handleCardEvent(e, card.id)}
-							onClick={(e) => handleCardEvent(e, card.id)}
-							onContextMenu={(e) => {
-								e.preventDefault();
-								handleRightClick(card.name);
-							}}
-						>
-							{renderImage(card)}
-						</div>
-						{/* Rarity: {card.rarity}
-						<br />
-						Layout: {card.layout} */}
+						<Card
+							card={card}
+							handleRightClick={handleRightClick}
+							setClickedCardName={setClickedCardName}
+							isModalOpen={isModalOpen}
+							setErrorMessageP={setErrorMessageP} />
 					</div>
 				))}
 			</div>
