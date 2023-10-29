@@ -110,8 +110,8 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
   return (
     <>
       <div className="imgContainer"
-        onMouseOver={() => handleCardEvent('mouseover', card.id)}
-        onMouseOut={() => handleCardEvent('mouseout', card.id)}
+        onMouseEnter={() => handleCardEvent('mouseover', card.id)}
+        onMouseLeave={() => handleCardEvent('mouseout', card.id)}
         onClick={(e) => handleCardEvent('click', card.id, e)}
         onContextMenu={(e) => {
           e.preventDefault();

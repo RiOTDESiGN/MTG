@@ -320,7 +320,7 @@ const handleClose = () => {
 
 	const resetCheckboxes = () => {selectedColorsRef.current = [];};	
 
-  const bottomThreshold = 600;
+  const bottomThreshold = 500;
 
 	const checkScrollPosition = () => {
 		const scrolledFromTop = window.scrollY;
