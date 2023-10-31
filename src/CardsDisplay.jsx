@@ -69,7 +69,7 @@ const searchCards = async (initialApiUrl) => {
   setIsLoading(true);
   const cards = [];
 	const query = queryRef.current ? queryRef.current.value : '';
-
+	
   try {
     let apiUrl = initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
 
@@ -260,6 +260,14 @@ const handleClose = () => {
 		{ label: 'green', code: 'G', color: '#00743f' },
 	];
 
+	function formatColors(colors) {
+		const len = colors.length;
+		if (len === 0) return '';
+		if (len === 1) return colors[0];
+		if (len === 2) return `${colors[0]} and ${colors[1]}`;
+		return `${colors.slice(0, len - 1).join(', ')} and ${colors[len - 1]}`;
+	}	
+
 	const handleColorSearch = (e, colorCode) => {
 		const selectedColors = selectedColorsRef.current;
 		const checkbox = e.target;
@@ -281,7 +289,7 @@ const handleClose = () => {
 			const foundFilter = colorFilters.find(filter => filter.code === colorCode);
 			return foundFilter ? foundFilter.label : '';
 		}).join(", ");
-		document.getElementById("searchedColors").textContent = fullColorNames;
+		document.getElementById("searchedColors").textContent = formatColors(fullColorNames.split(", ").filter(Boolean));
 	};	
 
 	const ColorSearch = ({ colorCode, color }) => (
