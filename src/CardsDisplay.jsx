@@ -445,9 +445,10 @@ const handleClose = () => {
 					<div className="search-results">
 						You're searching for <span id="searchedColors"></span> cards containing the word "<span id="searchedName"></span>"
 						{totalCards > 0 && `, and found ${totalCards} ${totalCards === 1 ? 'card' : 'cards'}.
-						${totalCards === 1 ? 'This is' : 'These are'} currently displayed ${totalPages === 1 ? 'on' : 'over'} ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}</div>
+						${totalCards === 1 ? 'This is' : 'These are'} currently displayed ${totalPages === 1 ? 'on' : 'over'} ${totalPages} ${totalPages === 1 ? 'page' : 'pages'}.`}
 					</div>
 				</div>
+			</div>
 			{errorMessageC && <div>{errorMessageC}</div>}
 			{isLoading && <div className="cards-loading">Loading...</div>}
 			{displayedCards.length === 0 && <div className="nocards">Search for cards or remove one of your color-filters.</div>}
