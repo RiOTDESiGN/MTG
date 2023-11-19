@@ -48,29 +48,32 @@ body {
   background-color: var(--body_bgc);
   color: var(--body_text_color);
   text-align: center;
-  scroll-behavior: smooth; 
+  scroll-behavior: smooth;
 }
 
-button, input, select {
+button,
+input,
+select {
   padding: 2px 8px 3px 8px;
   margin: 4px;
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
   height: 40px;
   width: 80px;
-  transition: .1s;
+  transition: 0.1s;
 }
 button:hover {
   background-color: var(--button_hover);
 }
 button:active {
-  transform: scale(.95);
+  transform: scale(0.95);
   color: var(--body_text_color);
 }
 button:disabled {
   pointer-events: none;
 }
-input, select {
+input,
+select {
   width: 228px;
 }
 .currentPage {
@@ -90,7 +93,9 @@ input, select {
   width: 316px;
 }
 .button-prev,
-.button-next {width: 50px;}
+.button-next {
+  width: 50px;
+}
 .arrow {
   border: solid black;
   border-width: 0 3px 3px 0;
@@ -182,6 +187,7 @@ input[type="checkbox"] {
 }
 
 .nocards {
+  padding-top: 50px;
   text-align: center;
 }
 
@@ -216,9 +222,13 @@ form {
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
   height: 40px;
+  user-select: none;
 }
 .search-results {
   color: var(--body_text_color);
+}
+.blackedOut {
+  color: var(--card_bgc);
 }
 
 .spacer {
@@ -237,7 +247,7 @@ form {
   align-items: center;
   justify-content: space-between;
   padding-left: 7px;
-	width: 100%;
+  width: 100%;
 }
 
 .cards-loading {
@@ -306,7 +316,7 @@ form {
 .displayCard img {
   width: 332px;
   border-radius: 22px;
-  transition: .2s;
+  transition: 0.2s;
   border: 2px solid transparent;
   transform: perspective(700px) translateY(-4%) rotateX(26deg) scale(0.8);
   box-shadow: var(--dc_boxshadow);
@@ -317,11 +327,12 @@ form {
   box-shadow: var(--dc_boxshadow_hover);
 }
 
-.aftermath, .split {
+.aftermath,
+.split {
   position: absolute;
   width: 333px;
   image-rendering: crisp-edges;
-  transition: .3s;
+  transition: 0.3s;
 }
 .split {
   transform: rotate(90deg);
@@ -355,23 +366,47 @@ form {
   animation: flip 1s ease-in forwards;
 }
 @keyframes flip {
-    0% {transform: rotateY(0deg);}
-   40% {transform: rotateY(195deg);}
-   60% {transform: rotateY(165deg);}
-   70% {transform: rotateY(185deg);}
-   85% {transform: rotateY(175deg);}
-  100% {transform: rotateY(180deg);}
+  0% {
+    transform: rotateY(0deg);
+  }
+  40% {
+    transform: rotateY(195deg);
+  }
+  60% {
+    transform: rotateY(165deg);
+  }
+  70% {
+    transform: rotateY(185deg);
+  }
+  85% {
+    transform: rotateY(175deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
 }
 .flipped-back {
-  animation: flip-back .7s ease-in forwards;
+  animation: flip-back 0.7s ease-in forwards;
 }
 @keyframes flip-back {
-    0% {transform: rotateY(180deg);}
-   40% {transform: rotateY(-15deg);}
-   60% {transform: rotateY(15deg);}
-   70% {transform: rotateY(-5deg);}
-   85% {transform: rotateY(5deg);}
-  100% {transform: rotateY(0deg);}
+  0% {
+    transform: rotateY(180deg);
+  }
+  40% {
+    transform: rotateY(-15deg);
+  }
+  60% {
+    transform: rotateY(15deg);
+  }
+  70% {
+    transform: rotateY(-5deg);
+  }
+  85% {
+    transform: rotateY(5deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
 }
 .flip-card-front,
 .flip-card-back {
@@ -395,7 +430,8 @@ form {
   cursor: pointer;
 }
 .upsidedown img {
-  transform: perspective(700px) translateY(-4%) rotateX(25deg) scale(0.8) rotate(180deg);
+  transform: perspective(700px) translateY(-4%) rotateX(25deg) scale(0.8)
+    rotate(180deg);
 }
 .upsidedown:hover img {
   transform: rotate(180deg);
