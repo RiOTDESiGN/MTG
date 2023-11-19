@@ -1,17 +1,19 @@
-import CardsDisplay from './CardsDisplay'
+import { CardsContextProvider } from "./CardsContext.jsx";
+import CardsDisplay from "./CardsDisplay";
 import MTGlogo from "./assets/MTGlogoLight.png";
-import './App.css'
+import "./App.css";
 
 function App() {
-
   return (
     <>
-    	<div className="title">
+      <div className="title">
         <img src={MTGlogo} alt="Magic The Gathering Logo" />
       </div>
-      <CardsDisplay />
+      <CardsContextProvider>
+        <CardsDisplay />
+      </CardsContextProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
