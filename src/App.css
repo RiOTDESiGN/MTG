@@ -282,6 +282,7 @@ form {
   padding: 2px 0;
   width: 332px;
   height: 465px;
+  user-select: none;
 }
 
 .modal {

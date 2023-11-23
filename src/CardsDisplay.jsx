@@ -211,6 +211,10 @@ function CardsDisplay() {
     }
   };
 
+  // const noPricesFound = Object.values(card.prices).every((value) =>
+  //   Boolean(value)
+  // );
+
   return (
     <div>
       <div className="controls">
@@ -309,6 +313,22 @@ function CardsDisplay() {
               isModalOpen={isModalOpen}
               setErrorMessageP={setErrorMessageP}
             />
+            {card.prices.eur && `EUR ${card.prices.eur}€`} / FOIL -&nbsp;
+            {card.prices.eur_foil && `EUR ${card.prices.eur_foil}€`}
+            {card.prices.eur && card.prices.usd && (
+              <>
+                <br />
+              </>
+            )}
+            {card.prices.usd && `USD ${card.prices.usd}$`} / FOIL -&nbsp;
+            {card.prices.usd_foil && `USD ${card.prices.usd_foil}$`}
+            {!card.prices.eur && !card.prices.usd && (
+              <>
+                No prices
+                <br />
+                available.
+              </>
+            )}
           </div>
         ))}
       </div>
