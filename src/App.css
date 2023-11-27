@@ -167,6 +167,7 @@ select {
   font-size: 30px;
   line-height: 0;
   padding-bottom: 5px;
+  cursor: pointer;
 }
 .scrollToTop {
   top: 10px;
@@ -327,6 +328,7 @@ form {
   transform: perspective(700px) translateY(-4%) rotateX(26deg) scale(0.8);
   box-shadow: var(--dc_boxshadow);
 }
+
 .hovered img {
   transform: scale(1);
   border: var(--dc_border_hover);
