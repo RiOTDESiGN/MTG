@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Card from "./Card";
 import { Sorting } from "./Sorting";
@@ -187,14 +187,21 @@ function CardsDisplay() {
     document.getElementById("searchedColors").textContent = formatColors(
       fullColorNames.split(", ").filter(Boolean)
     );
+    updateVisibility();
   };
 
-  const ColorSearch = ({ colorCode, color }) => (
+  const ColorSearch = ({ colorCode, color, isWhite }) => (
     <div className="checkbox-container" style={{ backgroundColor: color }}>
       <input
         type="checkbox"
+        id={`checkbox-${colorCode}`}
+        className={`custom-checkbox ${isWhite ? "white-checkbox" : ""}`}
         onChange={(e) => handleColorSearch(e, colorCode)}
       />
+      <label htmlFor={`checkbox-${colorCode}`}>
+        {" "}
+        <span className="checkbox-style"></span>
+      </label>
     </div>
   );
 
@@ -205,15 +212,39 @@ function CardsDisplay() {
   const handleInput = () => {
     const inputValue = queryRef.current.value;
     document.getElementById("searchedName").innerText = inputValue;
-    document.getElementById("search-results").classList.remove("blackedOut");
-    if (queryRef.current.value.length === 0) {
-      document.getElementById("search-results").classList.add("blackedOut");
-    }
+    updateVisibility();
   };
 
-  // const noPricesFound = Object.values(card.prices).every((value) =>
-  //   Boolean(value)
-  // );
+  function updateVisibility() {
+    const searchResults = document.getElementById("searchResults");
+    const searchedName = document.getElementById("searchedName");
+    const searchedColors = document.getElementById("searchedColors");
+    const wordText = document.getElementById("wordText");
+
+    if (
+      searchedName.textContent.trim().length === 0 &&
+      searchedColors.textContent.trim().length === 0
+    ) {
+      searchResults.style.display = "none";
+    }
+
+    if (
+      searchedName.textContent.trim().length > 0 ||
+      searchedColors.textContent.trim().length > 0
+    ) {
+      searchResults.style.display = "inline-block";
+    }
+
+    if (searchedName.textContent.trim().length > 0) {
+      wordText.style.display = "inline-block";
+    } else {
+      wordText.style.display = "none";
+    }
+  }
+
+  useEffect(() => {
+    updateVisibility();
+  }, []);
 
   return (
     <div>
@@ -248,6 +279,7 @@ function CardsDisplay() {
                     color={color}
                     isSelected={selectedColorsRef.current.includes(code)}
                     onChange={handleColorSearch}
+                    isWhite={label === "white"}
                   />
                 </div>
               ))}
@@ -256,12 +288,16 @@ function CardsDisplay() {
           <Sorting />
         </div>
         <div className="search-results-container">
-          <div id="search-results" className="search-results blackedOut">
+          <div id="searchResults" className="search-results">
             You're searching for <span id="searchedColors"></span> cards
-            containing the word "<span id="searchedName"></span>"
+            <div className="search-results-visible" id="wordText">
+              &nbsp;containing the word "<span id="searchedName"></span>"
+            </div>
             {totalCards > 0 &&
               `, and found ${totalCards} ${totalCards === 1 ? "card" : "cards"}.
-						${totalCards === 1 ? "This is" : "These are"} currently displayed ${
+              ${
+                totalCards === 1 ? "This is" : "These are"
+              } currently displayed ${
                 totalPages === 1 ? "on" : "over"
               } ${totalPages} ${totalPages === 1 ? "page" : "pages"}.`}
           </div>
@@ -313,22 +349,27 @@ function CardsDisplay() {
               isModalOpen={isModalOpen}
               setErrorMessageP={setErrorMessageP}
             />
-            {card.prices.eur && `EUR ${card.prices.eur}€`} / FOIL -&nbsp;
-            {card.prices.eur_foil && `EUR ${card.prices.eur_foil}€`}
+            {card.prices.eur && `EUR ${card.prices.eur}€`}
+            {card.prices.eur && card.prices.eur_foil && ` / `}
+            {card.prices.eur_foil && `FOIL - EUR ${card.prices.eur_foil}€`}
             {card.prices.eur && card.prices.usd && (
               <>
                 <br />
               </>
             )}
-            {card.prices.usd && `USD ${card.prices.usd}$`} / FOIL -&nbsp;
-            {card.prices.usd_foil && `USD ${card.prices.usd_foil}$`}
-            {!card.prices.eur && !card.prices.usd && (
-              <>
-                No prices
-                <br />
-                available.
-              </>
-            )}
+            {card.prices.usd && `USD ${card.prices.usd}$`}
+            {card.prices.usd && card.prices.usd_foil && ` / `}
+            {card.prices.usd_foil && `FOIL - USD ${card.prices.usd_foil}$`}
+            {!card.prices.eur &&
+              !card.prices.usd &&
+              !card.prices.eur_foil &&
+              !card.prices.usd_foil && (
+                <>
+                  No prices
+                  <br />
+                  available.
+                </>
+              )}
           </div>
         ))}
       </div>

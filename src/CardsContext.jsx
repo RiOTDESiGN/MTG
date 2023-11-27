@@ -27,7 +27,9 @@ export const CardsContextProvider = ({ children }) => {
     totalPages < 2 ? null : (
       <div className="pagination">
         <button
-          className="button-prev"
+          className={`button-prev ${
+            currentPage === 0 || currentPage === 1 ? "disabled" : ""
+          }`}
           onClick={() => setCurrentPage(currentPage - 1)}
           disabled={currentPage === 0 || currentPage === 1}
         >
@@ -37,7 +39,9 @@ export const CardsContextProvider = ({ children }) => {
           {currentPage} / {totalPages}
         </div>
         <button
-          className="button-next"
+          className={`button-next ${
+            currentPage * cardsPerPage >= totalCards ? "disabled" : ""
+          }`}
           onClick={() => setCurrentPage(currentPage + 1)}
           disabled={currentPage * cardsPerPage >= totalCards}
         >

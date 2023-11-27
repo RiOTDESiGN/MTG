@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useCardsContext } from "./CardsContext";
+import CustomSelect from "./CustomSelect";
 
 export function Sorting() {
   const {
@@ -141,14 +142,24 @@ export function Sorting() {
     isSelected,
     onChange,
     disabled,
+    isWhite,
   }) => (
-    <div className="checkbox-container" style={{ backgroundColor: color }}>
+    <div
+      className={`checkbox-container ${disabled ? "disabled" : ""}`}
+      style={{ backgroundColor: color }}
+    >
       <input
         type="checkbox"
+        id={`checkboxfilter-${colorCode}`}
+        className={`custom-checkbox ${isWhite ? "white-checkbox" : ""}`}
         checked={isSelected}
         onChange={() => onChange(colorCode)}
         disabled={disabled}
       />
+      <label htmlFor={`checkboxfilter-${colorCode}`}>
+        {" "}
+        <span className="checkbox-style"></span>
+      </label>
     </div>
   );
 
@@ -156,60 +167,79 @@ export function Sorting() {
     setCardsPerPage(newCardsPerPage);
     setCurrentPage(1);
   };
+  const handleSelectChange = (value) => {
+    handleCardsPerPageChange(parseInt(value, 10));
+  };
+
+  const handleSortOrderChange = (value) => {
+    setSortOrder(value);
+  };
+
+  const handleCardSortChange = (value) => {
+    sortCards(value);
+    setSelectedSort(value);
+    setSortOrder("asc");
+  };
+
+  const cardsPerPageOptions = [
+    { value: "50", label: "50" },
+    { value: "100", label: "100" },
+    { value: "250", label: "250" },
+    { value: "500", label: "500" },
+    { value: "1000", label: "1000" },
+  ];
+
+  const sortOrderOptions = [
+    { value: "asc", label: "Ascending" },
+    { value: "desc", label: "Descending" },
+  ];
+
+  const cardSortOptions = [
+    { value: "name", label: "Name" },
+    { value: "cmc", label: "Mana Cost" },
+    { value: "layout", label: "Layout (split, flip, transform, ...)" },
+    {
+      value: "color_identity",
+      label: "Color (white, blue, black, red, green)",
+    },
+    { value: "rarity", label: "Rarity (common, uncommon, rare, ...)" },
+  ];
 
   return (
     <>
       <div className="flex">
         <div className="flex flex-h">
-          <select
-            className="cards-per-page"
-            onChange={(e) =>
-              handleCardsPerPageChange(parseInt(e.target.value, 10))
-            }
-            value={cardsPerPage}
-          >
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value={250}>250</option>
-            <option value={500}>500</option>
-            <option value={1000}>1000</option>
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            disabled={!selectedSort}
-          >
-            <option value="" disabled>
-              Select sorting order..
-            </option>
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+          <div className="cards-per-page">
+            <CustomSelect
+              options={cardsPerPageOptions}
+              onChange={handleSelectChange}
+              value={cardsPerPage.toString()}
+              disabled={displayedCards.length === 0}
+              placeholder="#"
+            />
+          </div>
+          <div className="sort-order">
+            <CustomSelect
+              options={sortOrderOptions}
+              onChange={handleSortOrderChange}
+              value={sortOrder}
+              disabled={!selectedSort}
+              placeholder="Set sort order.."
+            />
+          </div>
         </div>
         {Pagination}
       </div>
       <div className="flex">
-        <select
-          className="select-sorting"
-          onChange={(e) => {
-            sortCards(e.target.value);
-            setSelectedSort(e.target.value);
-            setSortOrder("asc");
-          }}
-          value={selectedSort}
-          disabled={displayedCards.length === 0}
-        >
-          <option value="" disabled>
-            Sort cards by..
-          </option>
-          <option value="name">Name</option>
-          <option value="cmc">Mana Cost</option>
-          <option value="layout">Layout (split, flip, transform, ...)</option>
-          <option value="color_identity">
-            Color (white, blue, black, red, green)
-          </option>
-          <option value="rarity">Rarity (common, uncommon, rare, ...)</option>
-        </select>
+        <div className="sort-cards">
+          <CustomSelect
+            options={cardSortOptions}
+            onChange={handleCardSortChange}
+            value={selectedSort}
+            disabled={displayedCards.length === 0}
+            placeholder="Sort cards by.."
+          />
+        </div>
         <div className="spacer"></div>
         <div className="color-options">
           {colorFilters.map(({ label, code, color }) => (
@@ -224,6 +254,7 @@ export function Sorting() {
                 color={color}
                 isSelected={filteredColors.includes(code)}
                 onChange={handleColorFilterChange}
+                isWhite={label === "white"}
                 disabled={
                   displayedCards.length === 0 && filteredColors.length === 0
                 }
