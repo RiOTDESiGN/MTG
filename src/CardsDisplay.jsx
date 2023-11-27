@@ -260,12 +260,14 @@ function CardsDisplay() {
               }}
             >
               <input
+                id="search"
+                name="search"
                 type="text"
                 ref={queryRef}
                 placeholder="Search by name.."
                 onInput={handleInput}
               />
-              <button>Search</button>
+              <button type="submit">Search</button>
             </form>
             <div className="color-options">
               {colorFilters.map(({ label, code, color }) => (
@@ -313,7 +315,9 @@ function CardsDisplay() {
       <div className="cardContainer">
         {isModalOpen && (
           <div className="modal">
-            <button onClick={handleClose}>X</button>
+            <button type="button" onClick={handleClose}>
+              X
+            </button>
             {clickedCardName} - Total Prints found: {totalPrints}
             {isLoading && <span>Loading...</span>}
             {errorMessageP && <div>{errorMessageP}</div>}
