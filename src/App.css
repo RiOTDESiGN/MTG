@@ -244,11 +244,8 @@ form {
 .color-options {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: space-between; */
 }
-.color-options input {
-  /* width: 30px; */
-}
+
 .new-line {
   display: flex;
   align-items: center;
