@@ -353,27 +353,6 @@ function CardsDisplay() {
               isModalOpen={isModalOpen}
               setErrorMessageP={setErrorMessageP}
             />
-            {card.prices.eur && `EUR ${card.prices.eur}€`}
-            {card.prices.eur && card.prices.eur_foil && ` / `}
-            {card.prices.eur_foil && `FOIL - EUR ${card.prices.eur_foil}€`}
-            {card.prices.eur && card.prices.usd && (
-              <>
-                <br />
-              </>
-            )}
-            {card.prices.usd && `USD ${card.prices.usd}$`}
-            {card.prices.usd && card.prices.usd_foil && ` / `}
-            {card.prices.usd_foil && `FOIL - USD ${card.prices.usd_foil}$`}
-            {!card.prices.eur &&
-              !card.prices.usd &&
-              !card.prices.eur_foil &&
-              !card.prices.usd_foil && (
-                <>
-                  No prices
-                  <br />
-                  available.
-                </>
-              )}
           </div>
         ))}
       </div>
