@@ -573,7 +573,8 @@ form {
   background-color: var(--ui_color);
   width: 40px;
   height: 40px;
-  border-top-right-radius: 6px;
+  padding-right: 2px;
+  border-top-right-radius: 26px;
   border-bottom-left-radius: 20px;
   z-index: 1;
   border: 2px solid var(--button_hover);
