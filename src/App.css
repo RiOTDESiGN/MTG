@@ -72,6 +72,7 @@ input::placeholder {
 }
 button:hover {
   background-color: var(--button_hover);
+  color: var(--card_bgc);
 }
 button:active {
   transform: scale(0.95);
@@ -569,27 +570,25 @@ form {
 
 .dollar-symbol {
   position: absolute;
-  font-size: 23px;
-  background-color: var(--ui_color);
-  width: 40px;
-  height: 40px;
-  padding-right: 2px;
-  border-top-right-radius: 26px;
-  border-bottom-left-radius: 20px;
+  background-color: var(--button_hover);
+  color: transparent;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   z-index: 1;
   border: 2px solid var(--button_hover);
-  animation: pulse 4s linear infinite;
+  transition: all 0.3s ease;
+  /* animation: pulse 1s linear infinite; */
 }
 
 @keyframes pulse {
   0% {
     opacity: 0;
   }
-  25% {
-    opacity: 1;
-  }
   50% {
-    opacity: 0;
+    opacity: 1;
   }
   100% {
     opacity: 0;
@@ -597,8 +596,17 @@ form {
 }
 
 .price-container:hover .dollar-symbol {
-  mix-blend-mode: normal;
-  color: var(--button_hover);
+  position: absolute;
+  font-size: 23px;
+  background-color: var(--ui_color);
+  color: var(--body_text_color);
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  padding-right: 1px;
+  z-index: 1;
+  border: 2px solid var(--button_hover);
   animation: none;
 }
 
@@ -616,9 +624,7 @@ form {
   padding-top: 6px;
   padding-left: 50px;
   padding-right: 50px;
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 16px;
+  border-radius: 20px;
   visibility: hidden;
   transition: all 0.3s ease;
   overflow: hidden;

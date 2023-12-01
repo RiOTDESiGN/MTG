@@ -323,23 +323,27 @@ function CardsDisplay() {
             {errorMessageP && <div>{errorMessageP}</div>}
             <div className="printsContainer">
               {prints.map((print) => {
-                const imageSrc =
-                  print.layout === "flip" ||
-                  print.layout === "split" ||
-                  print.layout === "aftermath"
-                    ? print.image_uris.normal
-                    : print.card_faces
-                    ? print.card_faces[0].image_uris.normal
-                    : print.image_uris.normal;
-                return (
-                  <div key={print.id}>
+                let images;
+                if (print.card_faces && print.card_faces.length > 0) {
+                  images = print.card_faces.map((face, index) => (
+                    <img
+                      key={index}
+                      className="unique-print"
+                      src={face.image_uris.normal}
+                      alt={`${print.name} - Face ${index + 1}`}
+                    />
+                  ));
+                } else {
+                  images = (
                     <img
                       className="unique-print"
-                      src={imageSrc}
+                      src={print.image_uris.normal}
                       alt={print.name}
                     />
-                  </div>
-                );
+                  );
+                }
+
+                return <div key={print.id}>{images}</div>;
               })}
             </div>
           </div>

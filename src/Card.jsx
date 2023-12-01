@@ -18,6 +18,10 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
     eventMap[eventType]?.();
   };
 
+  const handlePriceContainerClick = (event) => {
+    event.stopPropagation();
+  };
+
   const toggleActiveCard = (cardId) => {
     setActiveCards((prevActiveCards) => {
       const newActiveCards = new Set(prevActiveCards);
@@ -77,12 +81,12 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
   const renderFlipImage = (card) => (
     <div className="upsidedown-container">
       <div
-        className={`${activeCards.has(card.id) ? "upsidedown" : ""}`}
+        className={`${
+          activeCards.has(card.id) ? "upsidedown" : ""
+        } ${getCardClass(card)}`}
         onClick={(e) => handleCardEvent("click", card.id, e)}
       >
-        <div className={getCardClass(card)}>
-          <img src={card.image_uris.normal} alt={card.name} />
-        </div>
+        <img src={card.image_uris.normal} alt={card.name} />
       </div>
     </div>
   );
@@ -157,7 +161,7 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
       >
         {renderImage(card)}
         {showPriceContainer && (
-          <div className="price-container">
+          <div className="price-container" onClick={handlePriceContainerClick}>
             <span className="dollar-symbol">$</span>
             {!card.prices.eur &&
             !card.prices.usd &&
