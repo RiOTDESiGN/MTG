@@ -269,6 +269,7 @@ form {
   padding: 24px 0;
   grid-template-columns: repeat(auto-fill, minmax(336px, 1fr));
   gap: 30px;
+  row-gap: 24px;
 }
 
 .card {
@@ -561,6 +562,14 @@ form {
   cursor: default;
 }
 
+.exclamation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 6px;
+}
+
 .price-container {
   display: inline-block;
   position: absolute;
@@ -580,7 +589,7 @@ form {
   z-index: 1;
   border: 2px solid var(--button_hover);
   transition: all 0.3s ease;
-  /* animation: pulse 1s linear infinite; */
+  animation: pulse 1.5s linear infinite;
 }
 
 @keyframes pulse {

@@ -139,7 +139,7 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
   useEffect(() => {
     let timer;
     if (hoveredCard) {
-      timer = setTimeout(() => setShowPriceContainer(true), 200);
+      timer = setTimeout(() => setShowPriceContainer(true), 300);
     } else {
       setShowPriceContainer(false);
     }

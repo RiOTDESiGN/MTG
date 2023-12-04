@@ -32,6 +32,7 @@ function CardsDisplay() {
   const [clickedCardName, setClickedCardName] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [prints, setPrints] = useState([]);
+  const [isExclamationChecked, setIsExclamationChecked] = useState(false);
 
   const resetStates = () => {
     setCards([]);
@@ -40,6 +41,8 @@ function CardsDisplay() {
     setTotalCards(0);
     setErrorMessageC("");
     setFilteredColors([]);
+    setIsExclamationChecked(false);
+    document.getElementById("exclamation-checkbox").checked = false;
   };
 
   const searchCardsCache = useRef({});
@@ -70,7 +73,13 @@ function CardsDisplay() {
   const searchCards = async (initialApiUrl) => {
     setIsLoading(true);
     const cards = [];
-    const query = queryRef.current ? queryRef.current.value : "";
+    let query = queryRef.current
+      ? queryRef.current.value.replace(/\s+/g, "")
+      : "";
+
+    if (isExclamationChecked) {
+      query = "!" + query;
+    }
 
     try {
       let apiUrl =
@@ -268,6 +277,23 @@ function CardsDisplay() {
                 onInput={handleInput}
               />
               <button type="submit">Search</button>
+              <div className="exclamation">
+                Search for this exact card:
+                <div className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    id="exclamation-checkbox"
+                    className="custom-checkbox"
+                    onChange={() =>
+                      setIsExclamationChecked(!isExclamationChecked)
+                    }
+                  />
+                  <label htmlFor="exclamation-checkbox">
+                    {" "}
+                    <span className="checkbox-style"></span>
+                  </label>
+                </div>
+              </div>
             </form>
             <div className="color-options">
               {colorFilters.map(({ label, code, color }) => (
