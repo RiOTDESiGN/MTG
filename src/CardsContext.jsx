@@ -15,6 +15,9 @@ export const CardsContextProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredCards, setFilteredCards] = useState([]);
   const [filteredColors, setFilteredColors] = useState([]);
+  const [searchColors, setSearchColors] = useState([]);
+  const [disableElement, setDisableElement] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const displayedCards = filteredCards.slice(
     (currentPage - 1) * cardsPerPage,
@@ -80,10 +83,16 @@ export const CardsContextProvider = ({ children }) => {
     setFilteredCards,
     filteredColors,
     setFilteredColors,
+    searchColors,
+    setSearchColors,
     displayedCards,
     Pagination,
     colorFilters,
     totalPages,
+    setDisableElement,
+    disableElement,
+    showTooltip,
+    setShowTooltip,
   };
 
   return (

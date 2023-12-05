@@ -56,7 +56,6 @@ button,
 input,
 select {
   padding: 0px 8px 3px 8px;
-  margin: 4px;
   font-size: 18px;
   font-family: inherit;
   color: var(--body_text_color);
@@ -64,7 +63,7 @@ select {
   border: 2px solid rgb(0, 0, 0);
   border-radius: 6px;
   height: 40px;
-  width: 100px;
+  width: 100%;
   transition: 0.1s;
 }
 input::placeholder {
@@ -98,11 +97,11 @@ select {
   width: 86px;
 }
 .sort-order {
-  width: 250px;
+  width: 100%;
 }
-.sort-cards {
+/* .sort-cards {
   width: 350px;
-}
+} */
 .button-prev,
 .button-next {
   width: 50px;
@@ -181,15 +180,13 @@ select {
 
 .flex {
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
-  align-items: center;
   justify-content: space-between;
-  max-width: 350px;
+  gap: 6px;
+  width: 333px;
 }
 
 .flex-h {
-  flex-wrap: nowrap;
   flex-direction: row;
 }
 
@@ -201,7 +198,7 @@ select {
 form {
   display: flex;
   flex-wrap: wrap;
-  place-items: center;
+  justify-content: space-between;
 }
 
 .title {
@@ -241,18 +238,30 @@ form {
 
 .spacer {
   cursor: default;
+  background-color: black;
+  height: 28px;
+  border-radius: 5px;
+  transition: 1s;
+}
+
+.tooltip {
+  padding: 5px 10px;
+  color: white;
+  font-size: 12px;
+  z-index: 1000;
 }
 
 .color-options {
   display: flex;
   flex-wrap: wrap;
+  min-width: 279px;
 }
 
 .new-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 3px 0 8px;
+  padding: 0 6px;
   width: 100%;
 }
 
@@ -452,16 +461,16 @@ form {
 
 .custom-select {
   position: relative;
-  display: inline-block;
+  display: flex;
   text-align: left;
   font-size: 18px;
+  min-width: 84px;
   display: block;
   min-height: 40px;
   background: var(--ui_color);
   border-radius: 6px;
   border: 2px solid var(--card_bgc);
   outline: none;
-  margin: 4px;
   padding: 4px 0 0 10px;
   cursor: pointer;
   -webkit-user-select: none;
@@ -567,7 +576,7 @@ form {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 6px;
+  padding: 6px 6px 0 6px;
 }
 
 .price-container {

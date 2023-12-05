@@ -21,6 +21,9 @@ export function Sorting() {
     setCurrentPage,
     filteredColors,
     setFilteredColors,
+    disableElement,
+    showTooltip,
+    setShowTooltip,
   } = useCardsContext();
 
   const sortCards = (criteria) => {
@@ -128,12 +131,32 @@ export function Sorting() {
     return rarityValue1 - rarityValue2;
   };
 
+  // const handleColorFilterChange = (color) => {
+  //   setFilteredColors((prevFilteredColors) =>
+  //     prevFilteredColors.includes(color)
+  //       ? prevFilteredColors.filter((c) => c !== color)
+  //       : [...prevFilteredColors, color]
+  //   );
+  // };
+
   const handleColorFilterChange = (color) => {
-    setFilteredColors((prevFilteredColors) =>
-      prevFilteredColors.includes(color)
-        ? prevFilteredColors.filter((c) => c !== color)
-        : [...prevFilteredColors, color]
-    );
+    setFilteredColors((prevFilteredColors) => {
+      const isColorNotSelected = !prevFilteredColors.includes(color);
+
+      if (
+        isColorNotSelected &&
+        prevFilteredColors.length === colorFilters.length - 1
+      ) {
+        setShowTooltip(true);
+        setTimeout(() => setShowTooltip(false), 2000);
+        return prevFilteredColors;
+      }
+
+      setShowTooltip(false);
+      return isColorNotSelected
+        ? [...prevFilteredColors, color]
+        : prevFilteredColors.filter((c) => c !== color);
+    });
   };
 
   const ColorOption = ({
@@ -162,6 +185,12 @@ export function Sorting() {
       </label>
     </div>
   );
+
+  const Tooltip = ({ message }) => {
+    if (!message) return null;
+
+    return <div className="tooltip">{message}</div>;
+  };
 
   const handleCardsPerPageChange = (newCardsPerPage) => {
     setCardsPerPage(newCardsPerPage);
@@ -240,7 +269,11 @@ export function Sorting() {
             placeholder="Sort cards by.."
           />
         </div>
-        <div className="spacer"></div>
+        <div className="spacer">
+          {showTooltip && (
+            <Tooltip message="At least one filter must be active" />
+          )}
+        </div>
         <div className="color-options">
           {colorFilters.map(({ label, code, color }) => (
             <div
@@ -253,10 +286,11 @@ export function Sorting() {
                 colorCode={code}
                 color={color}
                 isSelected={filteredColors.includes(code)}
-                onChange={handleColorFilterChange}
+                onChange={() => handleColorFilterChange(code)}
                 isWhite={label === "white"}
                 disabled={
-                  displayedCards.length === 0 && filteredColors.length === 0
+                  disableElement ||
+                  (displayedCards.length === 0 && filteredColors.length === 0)
                 }
               />
             </div>

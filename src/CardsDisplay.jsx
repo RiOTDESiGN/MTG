@@ -21,10 +21,19 @@ function CardsDisplay() {
     Pagination,
     colorFilters,
     setFilteredColors,
+    setSearchColors,
+    searchColors,
     totalPages,
+    setDisableElement,
   } = useCardsContext();
 
   const queryRef = useRef(null);
+  useEffect(() => {
+    if (queryRef.current) {
+      queryRef.current.focus();
+    }
+  }, []);
+
   const selectedColorsRef = useRef([]);
 
   const [errorMessageC, setErrorMessageC] = useState("");
@@ -41,8 +50,8 @@ function CardsDisplay() {
     setTotalCards(0);
     setErrorMessageC("");
     setFilteredColors([]);
+    setSearchColors([]);
     setIsExclamationChecked(false);
-    document.getElementById("exclamation-checkbox").checked = false;
   };
 
   const searchCardsCache = useRef({});
@@ -80,6 +89,11 @@ function CardsDisplay() {
     if (isExclamationChecked) {
       query = "!" + query;
     }
+
+    setDisableElement(
+      queryRef.current.value.trim() === "" ||
+        selectedColorsRef.current.length > 0
+    );
 
     try {
       let apiUrl =
@@ -166,25 +180,28 @@ function CardsDisplay() {
     return `${colors.slice(0, len - 1).join(", ")} and ${colors[len - 1]}`;
   }
 
-  const handleColorSearch = (e, colorCode) => {
-    const selectedColors = selectedColorsRef.current;
-    const checkbox = e.target;
-
-    if (colorCode === "") {
-      selectedColorsRef.current = selectedColors.includes("") ? [] : [""];
-      checkbox.checked = selectedColorsRef.current.includes("");
-    } else {
-      const otherColors = selectedColors.filter((color) => color !== "");
-      if (otherColors.includes(colorCode)) {
-        selectedColorsRef.current = otherColors.filter(
-          (color) => color !== colorCode
-        );
-        checkbox.checked = false;
-      } else {
-        selectedColorsRef.current = [...otherColors, colorCode];
-        checkbox.checked = true;
-      }
+  const handleColorSearch = (colorCode) => {
+    if (displayedCards.length > 0) {
+      document.getElementById("searchedName").innerText = "";
+      document.getElementById("searchedColors").innerText = "";
+      setCards([]);
+      setFilteredColors([]);
     }
+    const selectedColors = selectedColorsRef.current;
+    const isAchromaticSelected = colorCode === "";
+    const updatedSelectedColors = isAchromaticSelected
+      ? selectedColors.includes("")
+        ? []
+        : [""]
+      : selectedColors.includes(colorCode)
+      ? selectedColors.filter((color) => color !== colorCode)
+      : [...selectedColors, colorCode];
+
+    selectedColorsRef.current = updatedSelectedColors;
+    setSearchColors(updatedSelectedColors);
+
+    updateCheckboxes();
+
     const fullColorNames = selectedColorsRef.current
       .map((colorCode) => {
         const foundFilter = colorFilters.find(
@@ -199,16 +216,26 @@ function CardsDisplay() {
     updateVisibility();
   };
 
-  const ColorSearch = ({ colorCode, color, isWhite }) => (
+  const updateCheckboxes = () => {
+    const selectedColors = selectedColorsRef.current;
+    const checkboxes = document.querySelectorAll(".custom-checkbox");
+
+    checkboxes.forEach((checkbox) => {
+      const colorCode = checkbox.id.replace("checkbox-", "");
+      checkbox.checked = selectedColors.includes(colorCode);
+    });
+  };
+
+  const ColorSearch = ({ colorCode, color, isWhite, checked, onChange }) => (
     <div className="checkbox-container" style={{ backgroundColor: color }}>
       <input
         type="checkbox"
         id={`checkbox-${colorCode}`}
         className={`custom-checkbox ${isWhite ? "white-checkbox" : ""}`}
-        onChange={(e) => handleColorSearch(e, colorCode)}
+        checked={checked}
+        onChange={() => onChange(colorCode)}
       />
       <label htmlFor={`checkbox-${colorCode}`}>
-        {" "}
         <span className="checkbox-style"></span>
       </label>
     </div>
@@ -219,6 +246,11 @@ function CardsDisplay() {
   };
 
   const handleInput = () => {
+    if (displayedCards.length > 0) {
+      document.getElementById("searchedColors").innerText = "";
+      setCards([]);
+      setFilteredColors([]);
+    }
     const inputValue = queryRef.current.value;
     document.getElementById("searchedName").innerText = inputValue;
     updateVisibility();
@@ -268,15 +300,17 @@ function CardsDisplay() {
                 queryRef.current.value = "";
               }}
             >
-              <input
-                id="search"
-                name="search"
-                type="text"
-                ref={queryRef}
-                placeholder="Search by name.."
-                onInput={handleInput}
-              />
-              <button type="submit">Search</button>
+              <div className="flex flex-h">
+                <input
+                  id="search"
+                  name="search"
+                  type="text"
+                  ref={queryRef}
+                  placeholder="Search by name.."
+                  onInput={handleInput}
+                />
+                <button type="submit">Search</button>
+              </div>
               <div className="exclamation">
                 Search for this exact card:
                 <div className="checkbox-container">
@@ -305,7 +339,7 @@ function CardsDisplay() {
                   <ColorSearch
                     colorCode={code}
                     color={color}
-                    isSelected={selectedColorsRef.current.includes(code)}
+                    checked={selectedColorsRef.current.includes(code)}
                     onChange={handleColorSearch}
                     isWhite={label === "white"}
                   />
@@ -317,7 +351,8 @@ function CardsDisplay() {
         </div>
         <div className="search-results-container">
           <div id="searchResults" className="search-results">
-            You're searching for <span id="searchedColors"></span> cards
+            {totalCards > 0 ? "You searched" : "You're searching"}
+            &nbsp;for <span id="searchedColors"></span> cards
             <div className="search-results-visible" id="wordText">
               &nbsp;containing the word "<span id="searchedName"></span>"
             </div>
