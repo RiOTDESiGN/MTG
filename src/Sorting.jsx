@@ -13,6 +13,7 @@ export function Sorting() {
     cardsPerPage,
     setCardsPerPage,
     currentPage,
+    totalCards,
     setTotalCards,
     setFilteredCards,
     displayedCards,
@@ -243,7 +244,7 @@ export function Sorting() {
               options={cardsPerPageOptions}
               onChange={handleSelectChange}
               value={cardsPerPage.toString()}
-              disabled={displayedCards.length === 0}
+              disabled={totalCards < 51}
               placeholder="#"
             />
           </div>
@@ -265,7 +266,7 @@ export function Sorting() {
             options={cardSortOptions}
             onChange={handleCardSortChange}
             value={selectedSort}
-            disabled={displayedCards.length === 0}
+            disabled={displayedCards.length < 2}
             placeholder="Sort cards by.."
           />
         </div>

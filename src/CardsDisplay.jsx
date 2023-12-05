@@ -21,8 +21,8 @@ function CardsDisplay() {
     Pagination,
     colorFilters,
     setFilteredColors,
-    setSearchColors,
     searchColors,
+    setSearchColors,
     totalPages,
     setDisableElement,
   } = useCardsContext();
@@ -51,7 +51,6 @@ function CardsDisplay() {
     setErrorMessageC("");
     setFilteredColors([]);
     setSearchColors([]);
-    setIsExclamationChecked(false);
   };
 
   const searchCardsCache = useRef({});
@@ -186,6 +185,7 @@ function CardsDisplay() {
       document.getElementById("searchedColors").innerText = "";
       setCards([]);
       setFilteredColors([]);
+      setErrorMessageC("");
     }
     const selectedColors = selectedColorsRef.current;
     const isAchromaticSelected = colorCode === "";
@@ -254,6 +254,7 @@ function CardsDisplay() {
     const inputValue = queryRef.current.value;
     document.getElementById("searchedName").innerText = inputValue;
     updateVisibility();
+    setErrorMessageC("");
   };
 
   function updateVisibility() {
@@ -261,6 +262,10 @@ function CardsDisplay() {
     const searchedName = document.getElementById("searchedName");
     const searchedColors = document.getElementById("searchedColors");
     const wordText = document.getElementById("wordText");
+
+    if (errorMessageC) {
+      searchResults.style.display = "none";
+    }
 
     if (
       searchedName.textContent.trim().length === 0 &&
@@ -318,9 +323,15 @@ function CardsDisplay() {
                     type="checkbox"
                     id="exclamation-checkbox"
                     className="custom-checkbox"
+                    checked={isExclamationChecked}
                     onChange={() =>
                       setIsExclamationChecked(!isExclamationChecked)
                     }
+                    onClick={() => {
+                      if (displayedCards.length > 0) {
+                        setCards([]);
+                      }
+                    }}
                   />
                   <label htmlFor="exclamation-checkbox">
                     {" "}
@@ -350,13 +361,19 @@ function CardsDisplay() {
           <Sorting />
         </div>
         <div className="search-results-container">
+          {errorMessageC && <div>{errorMessageC}</div>}
           <div id="searchResults" className="search-results">
             {totalCards > 0 ? "You searched" : "You're searching"}
-            &nbsp;for <span id="searchedColors"></span> cards
+            &nbsp;for {isExclamationChecked && "the "}
+            <span id="searchedColors"></span>
+            {searchColors && " "}
+            {isExclamationChecked ? "card" : " cards "}
             <div className="search-results-visible" id="wordText">
-              &nbsp;containing the word "<span id="searchedName"></span>"
+              {!isExclamationChecked && "containing the word"}&nbsp;"
+              <span id="searchedName"></span>"
             </div>
             {totalCards > 0 &&
+              !isExclamationChecked &&
               `, and found ${totalCards} ${totalCards === 1 ? "card" : "cards"}.
               ${
                 totalCards === 1 ? "This is" : "These are"
@@ -366,7 +383,6 @@ function CardsDisplay() {
           </div>
         </div>
       </div>
-      {errorMessageC && <div>{errorMessageC}</div>}
       {isLoading && <div className="cards-loading">Loading...</div>}
       {displayedCards.length === 0 && (
         <div className="nocards">
