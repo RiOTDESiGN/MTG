@@ -78,7 +78,7 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
     </div>
   );
 
-  const renderFlipImage = (card) => (
+  const renderUpsidedownImage = (card) => (
     <div className="upsidedown-container">
       <div
         className={`${
@@ -124,7 +124,7 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
     if (card.image_uris && card.layout !== "meld" && card.layout !== "flip") {
       return renderNormalImage(card);
     } else if (card.layout === "flip") {
-      return renderFlipImage(card);
+      return renderUpsidedownImage(card);
     } else if (card.card_faces) {
       return renderDoubleFaceImage(card);
     } else if (card.all_parts && card.layout === "meld") {

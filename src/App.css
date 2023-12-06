@@ -302,6 +302,9 @@ form {
   -webkit-user-select: none;
   user-select: none;
 }
+.imgContainer:hover {
+  z-index: 1;
+}
 
 .modal {
   position: fixed;
@@ -360,10 +363,6 @@ form {
 }
 .aftermath:active {
   transform: rotate(-90deg);
-}
-.aftermath:hover,
-.split:hover {
-  z-index: 1;
 }
 .aftermath:hover {
   cursor: pointer;
