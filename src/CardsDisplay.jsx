@@ -96,7 +96,8 @@ function CardsDisplay() {
 
     try {
       let apiUrl =
-        initialApiUrl || `https://api.scryfall.com/cards/search?q=${query}`;
+        initialApiUrl ||
+        `https://api.scryfall.com/cards/search?q=(not:digital)${query}`;
 
       if (query === "") {
         document.getElementById("searchedName").innerText = "";
@@ -141,7 +142,7 @@ function CardsDisplay() {
     console.log("Fetching from API");
 
     try {
-      let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=!"${nameToSearch}"+include:extras&unique=prints`;
+      let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=(not:digital)!"${nameToSearch}"+include:extras&unique=prints`;
       const response = await axios.get(apiUrl);
       setPrints(response.data.data);
       setTotalPrints(response.data.total_cards);

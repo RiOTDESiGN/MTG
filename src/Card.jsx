@@ -7,7 +7,10 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
 
   const handleCardEvent = (eventType, cardId, event) => {
     event && event.stopPropagation();
-    if (isModalOpen) return;
+    if (isModalOpen) {
+      setHoveredCard("");
+      return;
+    }
 
     const eventMap = {
       click: () => toggleActiveCard(cardId),
