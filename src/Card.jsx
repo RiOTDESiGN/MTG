@@ -58,7 +58,16 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
       index === 0 ? "siege" : ""
     );
     if (card.layout === "split") {
-      if (card.keywords.includes("Aftermath")) {
+      let containsAftermath = false;
+
+      // Check if any of the card faces contain 'Aftermath' in their oracle_text
+      card.card_faces.forEach((face) => {
+        if (face.oracle_text.includes("Aftermath")) {
+          containsAftermath = true;
+        }
+      });
+
+      if (containsAftermath) {
         pushIfCondition(true, "aftermath");
       } else {
         pushIfCondition(true, "split");

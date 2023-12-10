@@ -402,7 +402,10 @@ function CardsDisplay() {
             <div className="printsContainer">
               {prints.map((print) => {
                 let images;
-                if (print.card_faces && print.card_faces.length > 0) {
+                if (
+                  print.card_faces.image_uris &&
+                  print.card_faces.length > 0
+                ) {
                   images = print.card_faces.map((face, index) => (
                     <img
                       key={index}
