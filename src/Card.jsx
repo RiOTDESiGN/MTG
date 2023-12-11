@@ -40,6 +40,9 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
     if (card.id === hoveredCard) {
       classNames.push("hovered");
     }
+    if (card.id === "17ed4800-dc0f-4681-9ae6-74bd0018e8dc") {
+      classNames.push("rotate-90");
+    }
     const pushIfCondition = (condition, className) =>
       condition && classNames.push(className);
     const layouts = [
@@ -60,7 +63,6 @@ const Card = ({ card, handleRightClick, isModalOpen }) => {
     if (card.layout === "split") {
       let containsAftermath = false;
 
-      // Check if any of the card faces contain 'Aftermath' in their oracle_text
       card.card_faces.forEach((face) => {
         if (face.oracle_text.includes("Aftermath")) {
           containsAftermath = true;

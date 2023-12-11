@@ -137,12 +137,12 @@ function CardsDisplay() {
     }
   };
 
-  const searchPrints = async (nameToSearch = clickedCardName) => {
+  const searchPrints = async (clickedCardName) => {
     setIsLoading(true);
     console.log("Fetching from API");
 
     try {
-      let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=(not:digital)!"${nameToSearch}"+include:extras&unique=prints`;
+      let apiUrl = `https://api.scryfall.com/cards/search?order=released&q=(not:digital)!"${clickedCardName}"+include:extras&unique=prints`;
       const response = await axios.get(apiUrl);
       setPrints(response.data.data);
       setTotalPrints(response.data.total_cards);
@@ -402,9 +402,12 @@ function CardsDisplay() {
             <div className="printsContainer">
               {prints.map((print) => {
                 let images;
+
                 if (
-                  print.card_faces.image_uris &&
-                  print.card_faces.length > 0
+                  print.card_faces &&
+                  print.card_faces.some(
+                    (face) => face.image_uris && face.image_uris.normal
+                  )
                 ) {
                   images = print.card_faces.map((face, index) => (
                     <img

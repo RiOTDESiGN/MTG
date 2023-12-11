@@ -339,7 +339,6 @@ form {
   width: 332px;
   border-radius: 22px;
   transition: 0.2s;
-  border: 2px solid transparent;
   transform: perspective(700px) translateY(-4%) rotateX(26deg) scale(0.8);
   box-shadow: var(--dc_boxshadow);
 }
@@ -667,4 +666,9 @@ form {
 .price-container:hover .price {
   opacity: 1;
   visibility: visible;
+}
+
+.rotate-90 {
+  transform: rotate(90deg);
+  width: 333px;
 }
