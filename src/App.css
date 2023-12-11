@@ -321,8 +321,8 @@ form {
 }
 .modal button {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 10px;
+  right: 10px;
   width: 40px;
 }
 .printsContainer {
